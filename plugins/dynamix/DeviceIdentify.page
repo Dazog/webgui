@@ -36,6 +36,4 @@ $(function() {
 </table>
 <input type="button" value="_(Done)_" onclick="done()">
 
-:help36
-> This list shows the SMART identity information of this disk
-:end
+:smart_identity_help:

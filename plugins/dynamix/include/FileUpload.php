@@ -11,17 +11,16 @@
  */
 ?>
 <?
-$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$docroot   = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: '/usr/local/emhttp';
+$file      = rawurldecode($_POST['filename']);
+$temp      = "/var/tmp";
+$tmp       = '/tmp/plugins';
+$plugins   = '/var/log/plugins';
+$boot      = "/boot/config/plugins";
+$safepaths = ["$boot/dynamix"];
+$safeexts  = ['.png'];
 
-$cmd  = $_POST['cmd'] ?? 'load';
-$path = $_POST['path'] ?? '';
-$file = rawurldecode($_POST['filename']);
-$temp = "/var/tmp";
-$boot = "/boot/config/plugins/dynamix";
-$safepaths = [$boot];
-$safeexts = ['.png'];
-
-switch ($cmd) {
+switch ($_POST['cmd'] ?? 'load') {
 case 'load':
   if (isset($_POST['filedata'])) {
     exec("rm -f $temp/*.png");
@@ -29,6 +28,7 @@ case 'load':
   }
   break;
 case 'save':
+  $path = $_POST['path'];
   foreach ($safepaths as $safepath) {
     if (strpos(dirname("$path/{$_POST['output']}"),$safepath)===0 && in_array(substr(basename($_POST['output']),-4),$safeexts)) {
       exec("mkdir -p ".escapeshellarg(realpath($path)));
@@ -38,6 +38,7 @@ case 'save':
   }
   break;
 case 'delete':
+  $path = $_POST['path'];
   foreach ($safepaths as $safepath) {
     if (strpos(realpath("$path/$file"), $safepath) === 0 && in_array(substr(realpath("$path/$file"), -4), $safeexts)) {
       exec("rm -f ".escapeshellarg(realpath("$path/$file")));
@@ -47,27 +48,52 @@ case 'delete':
   }
   break;
 case 'add':
+  $file = basename($file);
   $path = "$docroot/languages/$file";
-  exec("mkdir -p ".escapeshellarg($path));
-  $result = file_put_contents("/$boot/$file.lang.zip",base64_decode(preg_replace('/^data:.*;base64,/','',$_POST['filedata'])));
-  if ($result) {
-    foreach (glob("$path/*.dot",GLOB_NOSORT) as $dot) unlink($dot);
+  $save = "/tmp/lang-$file.zip";
+  exec("mkdir -p $path");
+  if ($result = file_put_contents($save,base64_decode(preg_replace('/^data:.*;base64,/','',$_POST['filedata'])))) {
     @unlink("$docroot/webGui/javascript/translate.$file.js");
-    exec("unzip -qqjLo -d ".escapeshellarg($path)." ".escapeshellarg("$boot/$file.lang.zip"));
+    foreach (glob("$path/*.dot",GLOB_NOSORT) as $dot_file) unlink($dot_file);
+    exec("unzip -qqjLo -d $path $save", $dummy, $err);
+    @unlink($save);
+    if ($err > 1) {
+      exec("rm -rf $path");
+      $result = false;
+      break;
+    }
+    [$home,$name] = explode(' (',urldecode($_POST['name']));
+    $name  = rtrim($name,')'); $i = 0;
+    $place = "$plugins/lang-$file.xml";
+    $child = ['LanguageURL','Language','LanguageLocal','LanguagePack','Author','Name','TemplateURL','Version','Icon','Description','Changes'];
+    $value = ['',$name,$home,$file,$_SERVER['HTTP_HOST'],"$name translation",$place,date('Y.m.d',time()),'','',''];
+    // create a corresponding XML file
+    $xml = new SimpleXMLElement('<Language/>');
+    foreach ($child as $key) $xml->addChild($key,$value[$i++]);
+    // saved as file (not link)
+    $xml->asXML($place);
+    // return list of installed language packs
+    $installed = [];
+    foreach (glob("$docroot/languages/*",GLOB_ONLYDIR) as $dir) $installed[] = basename($dir);
+    exit(implode(',',$installed));
   }
-  $installed = [];
-  foreach (glob("$docroot/languages/*",GLOB_ONLYDIR) as $dir) $installed[] = basename($dir);
-  if ($result) exit(implode(',',$installed));
+  break;
 case 'rm':
+  $file = basename($file);
   $path = "$docroot/languages/$file";
   if ($result = is_dir($path)) {
-    exec("rm -rf ".escapeshellarg($path));
+    exec("rm -rf $path");
     @unlink("$docroot/webGui/javascript/translate.$file.js");
-    @unlink("$boot/$file.lang.zip");
+    @unlink("$boot/lang-$file.xml");
+    @unlink("$plugins/lang-$file.xml");
+    @unlink("$tmp/lang-$file.xml");
+    @unlink("$boot/dynamix/lang-$file.zip");
+    // return list of installed language packs
+    $installed = [];
+    foreach (glob("$docroot/languages/*",GLOB_ONLYDIR) as $dir) $installed[] = basename($dir);
+    exit(implode(',',$installed));
   }
-  $installed = [];
-  foreach (glob("$docroot/languages/*",GLOB_ONLYDIR) as $dir) $installed[] = basename($dir);
-  if ($result) exit(implode(',',$installed));
+  break;
 }
 exit($result ? 'OK 200' : 'Internal Error 500');
 ?>

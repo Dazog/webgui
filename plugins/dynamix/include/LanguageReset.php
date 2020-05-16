@@ -1,8 +1,3 @@
-Menu="Buttons:7"
-Title="Help"
-Icon="icon-u-help"
-Code="e934"
----
 <?PHP
 /* Copyright 2005-2020, Lime Technology
  * Copyright 2012-2020, Bergware International.
@@ -15,14 +10,15 @@ Code="e934"
  * all copies or substantial portions of the Software.
  */
 ?>
-<script>
-function HelpButton() {
-  if ($('#nav-item.HelpButton').toggleClass('active').hasClass('active')) {
-    $('.inline_help').show('slow');
-    $.cookie('help','help',{path:'/'});
-  } else {
-    $('.inline_help').hide('slow');
-    $.removeCookie('help',{path:'/'});
-  }
+<?
+$docroot = $docroot ?? $_SERVER['DOCUMENT_ROOT'] ?: "/usr/local/emhttp";
+
+$lang = $_POST['lang'] ?? '';
+$file = '/boot/config/plugins/dynamix/dynamix.cfg';
+
+if (file_exists($file)) {
+  exec("sed -ri 's/^(locale=\")[^\"]*/\\1$lang/' $file");
+} else {
+  file_put_contents($file, "[display]\nlocale=\"$lang\"\n");
 }
-</script>
+?>

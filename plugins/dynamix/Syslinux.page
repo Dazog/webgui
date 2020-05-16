@@ -198,10 +198,7 @@ $(function(){
 </script>
 <span class="status" style="margin-top:<?=$top?>px"><input type="checkbox" class="advancedview"></span>
 
-:help39
-> Use this page to make changes to your `syslinux.cfg` file.
-> You will need to reboot your server for these changes to take effect.
-:end
+:syslinux_cfg_help:
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareMenu(this)">
 <input type="hidden" name="#include" value="/webGui/include/update.file.php">
@@ -237,13 +234,6 @@ _(Permit UEFI boot mode)_ <input type="checkbox" name="boot" <?=is_dir('/boot/EF
 <input type="button" value="_(Default)_" onclick="setDefault(this.form)">
 : <input type="submit" value="_(Apply)_"><input type="button" value="_(Done)_" onclick="done()">
 
-:help40
-> Click the **Default** button to initialize the edit box with the
-> factory-default contents.  You still need to click **Apply** in order to
->commit the change.
->
-> Click the **Apply** button to commit the current edits.  Click **Reset** to
-> undo any changes you make (before Saving). Click **Done** to exit this page.
-:end
+:syslinux_button_help:
 
 </form>

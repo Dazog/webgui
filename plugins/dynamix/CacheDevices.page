@@ -29,9 +29,9 @@ table.divider{margin-top:20px}
 <script>
 function validate(poolname) {
   var valid = /^[a-z_]([a-z0-9_-]*[a-z_])*$/;
-  var reserved = [<?=implode(',',array_map('escapeshellarg',explode(',',$var['reservedNames'])))?>];
-  var shares = [<?=implode(',',array_map('escapeshellarg',array_filter(array_map('sharename',scandir('boot/config/shares')))))?>];
-  var pools = [<?=implode(',',array_map('escapeshellarg',$pools))?>];
+  var reserved = [<?=implode(',',array_map('escapestring',explode(',',$var['reservedNames'])))?>];
+  var shares = [<?=implode(',',array_map('escapestring',array_filter(array_map('sharename',scandir('boot/config/shares')))))?>];
+  var pools = [<?=implode(',',array_map('escapestring',$pools))?>];
   if (!poolname.trim()) return false;
   if (reserved.includes(poolname)) {
     swal({title:'_(Invalid pool name)_',text:'_(Do not use reserved names)_',type:'error',confirmButtonText:'_(Ok)_'});
@@ -62,13 +62,13 @@ function addPoolPopup() {
     show : {effect:'fade', duration:250},
     hide : {effect:'fade', duration:250},
     buttons: {
-      _(Add)_: function() {
+      '_(Add)_': function() {
         if (validate($(this).find('input[name="poolName"]').val())) {
           $(this).find('form').submit();
           $(this).dialog('close');
         }
       },
-      _(Cancel)_: function() {
+      '_(Cancel)_': function() {
         $(this).dialog('close');
       }
     }
@@ -131,42 +131,9 @@ _(Slots)_:
 </div>
 <?endif;?>
 
-:help3
-> **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *Pool Devices* is as follows:
->
-> <i class='fa fa-circle orb green-orb'></i>Normal operation, device is active.
->
-> <i class='fa fa-circle orb grey-orb'></i>Device is in standby mode (spun-down).
->
-> <i class='fa fa-square orb blue-orb'></i>New device.
->
-> <i class='fa fa-square orb grey-orb'></i>No device present, position is empty.
->
-> **Pool Devices** is a single device, or pool of multiple devices, *outside* the Unraid array.  It may be exported for network access just
-> like an Array device.  Being outside the Unraid array results in significantly faster write access.
->
-> There are two ways to configure the Pool devices:
->
-> 1. As a single device, or
-> 2. As a multi-device pool.
->
-> When configured as a single device you may format the device using any supported file system (btrfs, reiserfs,
-> or xfs).  This configuration offers the highest performance, but at the cost of no data protection - if the
-> single pool device fails all data contained on it may be lost.
->
-> When configured as a multi-device pool, Unraid OS will automatically select *btrfs-raid1* format (for both data
-> and meta-data).  btrfs permits any number of devices to be added to the pool and each copy of data is guaranteed
-> to be written to two different devices.  Hence the pool can withstand a single-disk failure without losing data.
->
-> When [User Shares](/Settings/ShareSettings) are enabled, user shares may be configured to
-> automatically make use of the Pool device in order to
-> speed up writes.  A special background process called the *mover* can be scheduled to run
-> periodically to move user share files off the Cache and onto the Array.
-:end
+:cache_devices_help:
 
 <?if ($var['fsState'] == "Stopped"):?>
 <div></div>
-:help4
-> **Slots** select the number of device slots in your server designated for Cache devices.
-:end
+:cache_slots_help:
 <?endif;?>

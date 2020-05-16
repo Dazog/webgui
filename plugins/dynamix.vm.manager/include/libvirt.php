@@ -602,7 +602,7 @@
 						continue;
 					}
 
-					$netmodel = 'virtio';
+					$netmodel = 'virtio-net';
 					if (!empty($nic['model'])) {
 						$netmodel = $nic['model'];
 					}

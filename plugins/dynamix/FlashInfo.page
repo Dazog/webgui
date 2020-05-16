@@ -65,9 +65,7 @@ _(Flash GUID)_:
 
 <?endif;?>
 
-:help38
-> Use *Flash backup* to create a single zip file of the current contents of the flash device and store it locally on your computer.
-:end
+:flash_backup_help:
 
 &nbsp;
 : <input type="button" value="_(Flash backup)_" onclick="backup()"><input type="button" value="_(Done)_" onclick="done()">

@@ -18,15 +18,7 @@ Cond="(($var['shareNFSEnabled']!='no') && (isset($name)?array_key_exists($name,$
 <?
 $width = [123,300];
 ?>
-:help29
-> *Read settings from* is used to preset the NFS security settings of the current selected share with the settings of an existing share.
->
-> Select the desired share name and press **Read** to copy the NFS security settings from the selected source.
->
-> *Write settings to* is used to copy the NFS security settings of the current selected share to one or more other existing shares.
->
-> Select the desired destinations and press **Write** to copy the NFS security settings to the selected shares.
-:end
+:nfs_security_help:
 
 <div class="clone1">
 <span class="clone">_(Read settings from)_</span><i class="fa fa-arrow-left fa-fw"></i>

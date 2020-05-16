@@ -37,9 +37,4 @@ boot_status();
 </tbody>
 </table>
 
-:help5
-> Vital array configuration is maintained on the USB Flash device; for this reason, it must remain
-> plugged in to your server.  Click on [Flash](/Main/Flash?name=flash) to see the GUID and registration
-> information, and to configure export settings.  Since the USB Flash device is formatted using FAT file system,
-> it may only be exported using SMB protocol.
-:end
+:boot_device_help:

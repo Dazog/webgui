@@ -15,8 +15,7 @@ Tag="share-alt-square"
  * all copies or substantial portions of the Software.
  */
 ?>
-> Use this page to make changes to your `smb-extra.conf` file.  Samba will need
-> to be restarted in order for changes to take effect.
+:smb_extra_conf_help:
 
 <?
 $file = "/boot/config/smb-extra.conf";
@@ -39,9 +38,6 @@ _(Samba extra configuration)_:
 &nbsp;
 : <input type="submit" value="_(Apply)_" disabled><input type="button" value="_(Done)_" onclick="done()"><?if ($var['fsState']=="Started"):?>*_(Array must be **Stopped** to change)_*<?endif;?>
 
-:help78
-> Click the **Apply** button to commit the current edits.  Click **Reset** to
-> undo any changes you make (before Saving). Click **Done** to exit this page.
-:end
+:smb_extra_button_help:
 
 </form>

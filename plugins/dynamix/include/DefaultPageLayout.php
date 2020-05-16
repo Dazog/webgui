@@ -39,7 +39,6 @@ $themes2 = in_array($theme,['gray','azure']);
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/dynamix-{$display['theme']}.css")?>">
 
 <style>
-
 <?if ($display['font']):?>
 html{font-size:<?=$display['font']?>}
 <?endif;?>
@@ -60,7 +59,7 @@ html{font-size:<?=$display['font']?>}
 .upgrade_notice i{margin:14px;float:right;cursor:pointer}
 .back_to_top{display:none;position:fixed;bottom:30px;right:12px;color:#e22828;font-size:2.5rem;z-index:999}
 <?
-$safemode = strpos(file_get_contents('/proc/cmdline'),'unraidsafemode')!==false;
+$safemode = $var['safeMode']=='yes';
 $tasks = find_pages('Tasks');
 $buttons = find_pages('Buttons');
 $banner = '/boot/config/plugins/dynamix/banner.png';
@@ -78,7 +77,7 @@ $notes = "&nbsp;<a href='#' title='"._('View Release Notes')."' onclick=\"openBo
 </style>
 
 <script src="<?autov('/webGui/javascript/dynamix.js')?>"></script>
-<script src="<?autov('/webGui/javascript/translate.'.($locale?:'en').'.js')?>"></script>
+<script src="<?autov('/webGui/javascript/translate.'.($locale?:'en_US').'.js')?>"></script>
 <script>
 Shadowbox.init({skipSetup:true});
 
@@ -223,9 +222,9 @@ function addBannerWarning(text,warning=true,noDismiss=false) {
   var cookieText = text.replace(/[^a-z0-9]/gi,'');
   if ($.cookie(cookieText) == "true") return false;
   if (warning) text = "<i class='fa fa-warning' style='float:initial;'></i> "+text;
-  if (!noDismiss) text = text + "<a class='bannerDismiss' onclick='dismissBannerWarning("+arrayEntry+",&quot;"+cookieText+"&quot;)'></a>";
   if ( bannerWarnings.indexOf(text) < 0 ) {
     var arrayEntry = bannerWarnings.push("placeholder") - 1;
+    if (!noDismiss) text = text + "<a class='bannerDismiss' onclick='dismissBannerWarning("+arrayEntry+",&quot;"+cookieText+"&quot;)'></a>";
     bannerWarnings[arrayEntry] = text;
   } else return bannerWarnings.indexOf(text);
 
@@ -237,7 +236,7 @@ function addBannerWarning(text,warning=true,noDismiss=false) {
 }
 
 function dismissBannerWarning(entry,cookieText) {
-  $.cookie(cookieText,"true");
+  $.cookie(cookieText,"true",{expires:365,path:'/'});
   removeBannerWarning(entry);
 }
 
@@ -588,7 +587,7 @@ watchdog.on('message', function(data) {
   } else if (state=='Formatting') {
     status = "<span class='green strong'><i class='fa fa-play-circle'></i> <?=_('Array Started')?></span>&bullet;<span class='orange strong'><?=_('Formatting device(s)')?></span>";
   } else {
-    status = "<span class='orange strong'><i class='fa fa-pause-circle'></i> Array "+state+"</span>";
+    status = "<span class='orange strong'><i class='fa fa-pause-circle'></i> "+_('Array '+state)+"</span>";
   }
   if (ini['mdResyncPos']>0) {
     var action;
@@ -600,7 +599,7 @@ watchdog.on('message', function(data) {
     status += "&bullet;<span class='orange strong'>"+action.replace('.','<?=$display['number'][0]?>')+"</span>";
     if (ini['mdResync']==0) status += "(<?=_('Paused')?>)";
   }
-  if (progress) status += "&bullet;<span class='blue strong'>"+progress+"</span>";
+  if (progress) status += "&bullet;<span class='blue strong'>"+_(progress)+"</span>";
   $('#statusbar').html(status);
 });
 var backtotopoffset = 250;

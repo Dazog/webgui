@@ -17,26 +17,22 @@ require_once "$docroot/webGui/include/Wrappers.php";
 require_once "$docroot/plugins/dynamix.plugin.manager/include/PluginHelpers.php";
 
 $var     = parse_ini_file('/var/local/emhttp/var.ini');
-$current = parse_ini_file('/etc/unraid-version');
 $unraid  = parse_plugin_cfg('dynamix', true);
 $server  = strtoupper($var['NAME']);
-$output  = $unraid['notify']['plugin'];
-$builtin = ['unRAIDServer','unRAIDServer-'];
+$output  = $unraid['notify']['language_notify'];
 $notify  = "$docroot/webGui/scripts/notify";
 $tmp     = '/tmp/plugins';
 $plugins = '/var/log/plugins';
 
-plugin('checkall');
-foreach (glob("/$tmp/*.plg", GLOB_NOSORT) as $file) {
-  $name = basename($file,'.plg');
-  // skip OS related updates
-  if (in_array($name,$builtin)) continue;
-  $new = plugin('version', $file);
-  $old = plugin('version', "$plugins/$name.plg");
-  $min = plugin('min', $file) ?: $current['version'];
-  // silently suppress bad download of PLG file
-  if (strcmp($new, $old)>0 && !version_compare($min,$current['version'],">")) {
-    exec("$notify -e ".escapeshellarg("Plugin - $name [$new]")." -s ".escapeshellarg("Notice [$server] - Version update $new")." -d ".escapeshellarg("A new version of $name is available")." -i ".escapeshellarg("normal $output")." -x");
+language('checkall');
+foreach (glob("/$tmp/dynamix.*.xml", GLOB_NOSORT) as $file) {
+  $name = str_replace('dynamix.', '', basename($file));
+  $lang = language('Language', $file);
+  $new  = language('Version', $file);
+  $old  = language('Version', "$plugins/dynamix.$name");
+  // silently suppress bad download of XML file
+  if (strcmp($new, $old) > 0) {
+    exec("$notify -e ".escapeshellarg("Language - $lang [$new]")." -s ".escapeshellarg("Notice [$server] - Version update $new")." -d ".escapeshellarg("A new version of $lang is available")." -i ".escapeshellarg("normal $output")." -x");
   }
 }
 exit(0);

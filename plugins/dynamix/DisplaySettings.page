@@ -18,7 +18,9 @@ Tag="desktop"
 <?
 $void = "<img src='/webGui/images/banner.png' id='image' width='330' height='30' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 $icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
-$keys = parse_ini_file('webGui/include/languages.key',false,INI_SCANNER_RAW);
+$plugins = '/var/log/plugins';
+
+require_once "$docroot/plugins/dynamix.plugin.manager/include/PluginHelpers.php";
 ?>
 <style>
 span#dropbox{margin-right:20px;}
@@ -118,20 +120,21 @@ $(function() {
 });
 </script>
 
-:help100
-> The display settings below determine how items are displayed on screen. Use these settings to tweak the visual effects to your likings.
->
-> You can experiment with these settings as desired, they only affect visual properties.
-:end
+:display_settings_help:
 
 <form markdown="1" name="display_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="saveFontSize();upload();">
 <input type="hidden" name="#file" value="dynamix/dynamix.cfg">
 <input type="hidden" name="#section" value="display">
 _(Language)_:
 : <select name="locale">
-  <?=mk_option($display['locale'], "","English")?>
-  <?foreach (glob("$docroot/languages/*",GLOB_ONLYDIR) as $dir) echo mk_option($display['locale'],basename($dir),$keys[basename($dir)])?>
-  </select>
+<?echo mk_option($display['locale'], "","English");
+  foreach (glob("$plugins/lang-*.xml",GLOB_NOSORT) as $xml_file) {
+    $lang = language('Language', $xml_file);
+    $home = language('LanguageLocal', $xml_file);
+    $name = language('LanguagePack', $xml_file);
+    echo mk_option($display['locale'], $name, "$home ($lang)");
+  }
+?></select>
 
 _(Font size)_:
 : <select name="font" id='font'>
@@ -143,9 +146,7 @@ _(Font size)_:
   <?=mk_option($display['font'],"80%",_('Huge'))?>
   </select>
 
-:help101
-> This is a per device setting
-:end
+:display_font_size_help:
 
 _(Date format)_:
 : <select name="date" onchange="presetTime(this.form)">
@@ -216,13 +217,7 @@ _(Display world-wide-name in device ID)_:
   <?=mk_option($display['wwn'], "1",_('Automatic'))?>
   </select>
 
-:help102
-> World Wide Name (WWN) is a unique identifier used for SAS attached devices.
->
-> Select *Disabled* to suppress the appending of WWN to the device identification
->
-> Select "Automatic" to append WWN to the device identification in case of SAS devices
-:end
+:display_wwn_device_id_help:
 
 _(Display array totals)_:
 : <select name="total">
@@ -239,16 +234,12 @@ _(Show array utilization indicator)_:
 _(Header custom text color)_:
 : <input type="text" class="narrow" name="header" value="<?=$display['header']?>" maxlength="6" pattern="[0-9a-fA-F]{3,6}" title="_(HTML color code of 3 or 6 hexadecimal digits)_">
 
-:help103
-> Overrule the default text color in the header. This can be used to match the text color with a background image.
-:end
+:display_custom_text_color_help:
 
 _(Header custom background color)_:
 : <input type="text" class="narrow" name="background" value="<?=$display['background']?>" maxlength="6" pattern="[0-9a-fA-F]{3,6}" title="_(HTML color code of 3 or 6 hexadecimal digits)_">
 
-:help104
-> Overrule the default background color in the header. This can be used to match the background color with a custom text color.
-:end
+:display_custom_background_color_help:
 
 _(Show banner)_:
 : <select name="banner" onchange="presetBanner(this.form)">
@@ -268,9 +259,7 @@ _(Custom banner)_:
   </span><em>_(Drag-n-drop a PNG file or click the image at the left)_.</em><input type="file" id="drop" accept=".png" style="display:none">
 </div>
 
-:help6
-> Image will be scaled to 1920x90 pixels. The maximum image file upload size is 512 kB (524,288 bytes).
-:end
+:display_custom_banner_help:
 
 _(Show Dashboard apps)_:
 : <select name="dashapps">
@@ -305,11 +294,7 @@ _(Temperature unit)_:
   <?=mk_option($display['unit'], "F",_('Fahrenheit'))?>
   </select>
 
-:help7
-> Selects the temperature unit for the disk temperature thresholds. Changing the unit will adjust the existing value in the disk temperature thresholds as appropriate.
->
-> Make sure any newly entered values represent the selected temperature unit.
-:end
+:display_temperature_unit_help:
 
 <input type="submit" name="#default" value="_(Default)_" onclick="filename='reset'">
 : <input type="submit" name="#apply" value="_(Apply)_" disabled><input type="button" value="_(Done)_" onclick="done()">

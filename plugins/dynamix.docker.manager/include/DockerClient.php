@@ -232,11 +232,14 @@ class DockerTemplates {
 		return $output;
 	}
 
-	public function getTemplateValue($Repository, $field, $scope='all') {
+	public function getTemplateValue($Repository, $field, $scope='all',$name='') {
 		foreach ($this->getTemplates($scope) as $file) {
 			$doc = new DOMDocument();
 			$doc->load($file['path']);
 			$TemplateRepository = DockerUtil::ensureImageTag($doc->getElementsByTagName('Repository')->item(0)->nodeValue);
+			if ( $name )
+				if ($doc->getElementsByTagName('Name')->item(0)->nodeValue !== $name)
+					continue;
 			if ($Repository == $TemplateRepository) {
 				$TemplateField = $doc->getElementsByTagName($field)->item(0)->nodeValue;
 				return trim($TemplateField);
@@ -244,7 +247,7 @@ class DockerTemplates {
 		}
 		return null;
 	}
-
+	
 	public function getUserTemplate($Container) {
 		foreach ($this->getTemplates('user') as $file) {
 			$doc = new DOMDocument('1.0', 'utf-8');
@@ -285,7 +288,7 @@ class DockerTemplates {
 			$tmp['paused'] = $ct['Paused'];
 			$tmp['autostart'] = in_array($name, $autoStart);
 			$tmp['cpuset'] = $ct['CPUset'];
-			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image);
+			if (!is_file($tmp['icon']) || $reload) $tmp['icon'] = $this->getIcon($image,$name);
 			if ($ct['Running']) {
 				$port = &$ct['Ports'][0];
 				$ip = ($ct['NetworkMode']=='host'||$port['NAT'] ? $host : $port['IP']);
@@ -308,17 +311,18 @@ class DockerTemplates {
 		return $info;
 	}
 
-	public function getIcon($Repository) {
+	public function getIcon($Repository,$contName) {
 		global $docroot, $dockerManPaths;
-		$imgUrl = $this->getTemplateValue($Repository, 'Icon');
+		$imgUrl = $this->getTemplateValue($Repository, 'Icon','all',$contName);
 		if (!$imgUrl) return '';
-		preg_match_all("/(.*?):([\S]*$)/i", $Repository, $matches);
-		$name = preg_replace("%\/|\\\%", '-', $matches[1][0]);
-		$version = $matches[2][0];
-		$iconRAM = sprintf('%s/%s-%s-%s.png', $dockerManPaths['images-ram'], $name, $version, 'icon');
-		$icon    = sprintf('%s/%s-%s-%s.png', $dockerManPaths['images'], $name, $version, 'icon');
+
+		$imageName = $contName ?: $name;
+		$iconRAM = sprintf('%s/%s-%s.png', $dockerManPaths['images-ram'], $contName, 'icon');
+		$icon    = sprintf('%s/%s-%s.png', $dockerManPaths['images'], $contName, 'icon');
+		
 		if (!is_dir(dirname($iconRAM))) mkdir(dirname($iconRAM), 0755, true);
 		if (!is_dir(dirname($icon))) mkdir(dirname($icon), 0755, true);
+
 		if (!is_file($iconRAM)) {
 			if (!is_file($icon)) $this->download_url($imgUrl, $icon);
 			@copy($icon, $iconRAM);

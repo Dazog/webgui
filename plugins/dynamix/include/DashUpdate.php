@@ -406,7 +406,7 @@ case 'parity':
       echo _('Parity has not been checked yet');
     } elseif ($status==0) {
       echo sprintf(_('Last checked on **%s**'),my_lang(my_time($date).my_lang(day_count($date),1))).'<br> '.sprintf(_('Finding **%s** error'.($error==1?'':'s')),$error?:'0');
-      echo " <i class='fa fa-fw fa-clock-o'></i> "._('Duration').": ".my_lang(my_check($duration,$speed),2);
+      echo " <i class='fa fa-fw fa-clock-o'></i> "._('Duration').": "._(my_lang(my_check($duration,$speed),2));
     } else {
       echo sprintf(_('Last check incomplete on **%s**'),my_lang(my_time($date).my_lang(day_count($date),1))).'<br>'.sprintf(_('Finding **%s** error'.($error==1?'':'s')),$error?:'0');
       echo " <i class='fa fa-fw fa-dot-circle-o'></i> "._('Error code').": ".my_error($status);
@@ -416,7 +416,7 @@ case 'parity':
       list($entry,$duration,$speed,$status,$error) = explode('|', read_parity_log($var['sbSynced'],!$idle));
       if ($status==0) {
         echo sprintf(_('Last checked on **%s**'),my_lang(my_time($var['sbSynced']).my_lang(day_count($var['sbSynced']),1))).'<br>'.sprintf(_('Finding **%s** error'.($error==1?'':'s')),$error?:'0');
-        echo " <i class='fa fa-fw fa-clock-o'></i> "._('Duration').": ".my_lang(my_check($duration,$speed),2);
+        echo " <i class='fa fa-fw fa-clock-o'></i> "._('Duration').": "._(my_lang(my_check($duration,$speed),2));
       } else {
         echo sprintf(_('Last check incomplete on **%s**'),my_lang(my_time($var['sbSynced']).my_lang(day_count($var['sbSynced']),1))).'<br>'.sprintf(_('Finding **%s** error'.($error==1?'':'s')),$error?:'0');
         echo " <i class='fa fa-fw fa-dot-circle-o'></i> "._('Error code').": ".my_error($status);
@@ -431,7 +431,7 @@ case 'parity':
     $duration = $var['sbSynced2']-$var['sbSynced'];
     $speed = $duration?my_scale($var['mdResyncSize']*1024/$duration,$unit,1)." $unit/sec":'';
     echo sprintf(_('Last check completed on **%s**'),my_lang(my_time($var['sbSynced2']).my_lang(day_count($var['sbSynced2']),1))).'<br>'.sprintf(_('Finding **%s** error'.($var['sbSyncErrs']==1?'':'s')),$var['sbSyncErrs']?:'0');
-    echo " <i class='fa fa-fw fa-clock-o'></i> "._('Duration').': '.my_lang(my_check($duration,$speed),2);
+    echo " <i class='fa fa-fw fa-clock-o'></i> "._('Duration').': '._(my_lang(my_check($duration,$speed),2));
   }
   if ($idle) {
     list($m,$h) = explode(' ', $parity['hour']);

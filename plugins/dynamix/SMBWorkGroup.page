@@ -19,9 +19,7 @@ Cond="($var['shareSMBEnabled']=='yes')"
 _(Workgroup)_:
 : <input type="text" name="WORKGROUP" maxlength="40" value="<?=htmlspecialchars($var['WORKGROUP'])?>" class="narrow" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
 
-:help79
-> Enter your local network Workgroup name. Usually this is "WORKGROUP".
-:end
+:smb_workgroup_help:
 
 _(Local master)_:
 : <select name="localMaster" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
@@ -29,10 +27,7 @@ _(Local master)_:
   <?=mk_option($var['localMaster'], "yes", _('Yes'))?>
   </select>
 
-:help80
-> If set to 'Yes' then the server will fully participate in browser elections, and in the absense
-> of other servers, will usually become the local Master Browser.
-:end
+:smb_local_master_help:
 
 &nbsp;
 : <input type="submit" name="changeShare" value="_(Apply)_" disabled><input type="button" value="_(Done)_" onclick="done()"><?if ($var['fsState']=="Started"):?>*_(Array must be **Stopped** to change)_*<?endif;?>

@@ -45,7 +45,4 @@ endforeach;
 </tbody>
 </table>
 
-:help37
-> These are devices installed in your server but not assigned to either the parity-protected
-> array or the cache disk/pool.
-:end
+:open_devices_help:

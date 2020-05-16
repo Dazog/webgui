@@ -85,7 +85,7 @@ if (isset($_POST['contName'])) {
       $oldXML = simplexml_load_file($filename);
       if ($oldXML->Icon != $_POST['contIcon']) {
         if (!strpos($Repository,":")) $Repository .= ":latest";
-        $iconPath = $DockerTemplates->getIcon($Repository);
+        $iconPath = $DockerTemplates->getIcon($Repository,$Name);
         @unlink("$docroot/$iconPath");
         @unlink("{$dockerManPaths['images']}/".basename($iconPath));
       }
@@ -279,6 +279,7 @@ dl,dt,dd{line-height:normal!important}
 <script src="<?autov('/webGui/javascript/jquery.switchbutton.js')?>"></script>
 <script src="<?autov('/webGui/javascript/jquery.filetree.js')?>"></script>
 <script src="<?autov('/plugins/dynamix.vm.manager/javascript/dynamix.vm.manager.js')?>"></script>
+<script src="<?autov('/plugins/dynamix.docker.manager/javascript/markdown.js')?>"></script>
 <script>
 var confNum = 0;
 var drivers = {};
@@ -393,7 +394,7 @@ function addConfigPopup() {
     show : {effect: 'fade' , duration: 250},
     hide : {effect: 'fade' , duration: 250},
     buttons: {
-      _(Add)_: function() {
+      '_(Add)_': function() {
         $(this).dialog("close");
         confNum += 1;
         var Opts = Object;
@@ -420,7 +421,7 @@ function addConfigPopup() {
         reloadTriggers();
         $('input[name="contName"]').trigger('change'); // signal change
       },
-      _(Cancel)_: function() {
+      '_(Cancel)_': function() {
         $(this).dialog("close");
       }
     }
@@ -469,7 +470,7 @@ function editConfigPopup(num,disabled) {
     show: {effect:'fade', duration: 250},
     hide: {effect:'fade', duration: 250},
     buttons: {
-      _(Save)_: function() {
+      '_(Save)_': function() {
         $(this).dialog("close");
         var Opts = Object;
         var Element = this;
@@ -505,7 +506,7 @@ function editConfigPopup(num,disabled) {
        reloadTriggers();
         $('input[name="contName"]').trigger('change'); // signal change
       },
-      _(Cancel)_: function() {
+      '_(Cancel)_': function() {
         $(this).dialog("close");
       }
     }
@@ -704,21 +705,7 @@ _(Template)_:
   }
   ?></select><?if ($rmadd):?><i class="fa fa-window-close button" title="<?=htmlspecialchars($rmadd)?>" onclick="rmTemplate('<?=addslashes(htmlspecialchars($rmadd))?>')"></i><?endif;?>
 
-:help1
-> Templates are a quicker way to setting up Docker Containers on your Unraid server.  There are two types of templates:
->
-> **Default templates**<br>
-> When valid repositories are added to your Docker Repositories page, they will appear in a section on this drop down for you to choose (master categorized by author, then by application template).
-> After selecting a default template, the page will populate with new information about the application in the Description field, and will typically provide instructions for how to setup the container.
-> Select a default template when it is the first time you are configuring this application.
->
-> **User-defined templates**<br>
-> Once you've added an application to your system through a Default template,
-> the settings you specified are saved to your USB flash device to make it easy to rebuild your applications in the event an upgrade were to fail or if another issue occurred.
-> To rebuild, simply select the previously loaded application from the User-defined list and all the settings for the container will appear populated from your previous setup.
-> Clicking create will redownload the necessary files for the application and should restore you to a working state.
-> To delete a User-defined template, select it from the list above and click the red X to the right of it.
-:end
+:docker_client_general_help:
 
 </div>
 <?endif;?>
@@ -727,9 +714,7 @@ _(Template)_:
 _(Name)_:
 : <input type="text" name="contName" required>
 
-:help2
-> Give the container a name or leave it as default.
-:end
+:docker_client_name_help:
 
 </div>
 <div markdown="1" class="basic">
@@ -741,9 +726,7 @@ _(Overview)_:
 _(Overview)_:
 : <textarea name="contOverview" spellcheck="false" cols="80" rows="15" style="width:56%"></textarea>
 
-:help3
-> A description for the application container.  Supports basic HTML mark-up.
-:end
+:docker_client_overview_help:
 
 </div>
 
@@ -751,10 +734,7 @@ _(Overview)_:
 _(Repository)_:
 : <input type="text" name="contRepository" required>
 
-:help4
-> The repository for the application on the Docker Registry.  Format of authorname/appname.
-> Optionally you can add a : after appname and request a specific version for the container image.
-:end
+:docker_client_repository_help:
 
 </div>
 <div markdown="1" class="<?=$authoring?>">
@@ -806,88 +786,63 @@ _(Categories)_:
 _(Support Thread)_:
 : <input type="text" name="contSupport">
 
-:help5
-> Link to a support thread on Lime-Technology's forum.
-:end
+:docker_client_support_thread_help:
 
 _(Project Page)_:
 : <input type="text" name="contProject">
 
-:help6
-> Link to the project page (eg: www.plex.tv)
-:end
+:docker_client_project_page_help:
 
 _(Donation Text)_:
 : <input type="text" name="contDonateText">
 
-:help7
-> Text to appear on Donation Links Within The Apps Tab
-:end
+:docker_client_donation_text_help:
 
 _(Donation Link)_:
 : <input type="text" name="contDonateLink">
 
-:help8
-> Link to the donation page.  If using donation's, both the image and link must be set
-:end
+:docker_client_donation_link_help:
 
 </div>
 <div markdown="1" class="advanced">
 _(Docker Hub URL)_:
 : <input type="text" name="contRegistry"></td>
 
-:help9
-> The path to the container's repository location on the Docker Hub.
-:end
+:docker_client_hub_url_help:
 
 </div>
 <div markdown="1" class="noshow"> <!-- Deprecated for author to enter or change, but needs to be present -->
 _(Template URL)_:
 : <input type="text" name="contTemplateURL">
 
-:help10
-> This URL is used to keep the template updated.
-:end
+:docker_client_template_url_help:
 
 </div>
 <div markdown="1" class="advanced">
 _(Icon URL)_:
 : <input type="text" name="contIcon">
 
-:help11
-> Link to the icon image for your application (only displayed on dashboard if Show Dashboard apps under Display Settings is set to Icons).
-:end
+:docker_client_icon_url_help:
 
 _(WebUI)_:
 : <input type="text" name="contWebUI">
 
-:help12
-> When you click on an application icon from the Docker Containers page, the WebUI option will link to the path in this field.
-> Use [IP] to identify the IP of your host and [PORT:####] replacing the #'s for your port.
-:end
+:docker_client_webui_help:
 
 _(Extra Parameters)_:
 : <input type="text" name="contExtraParams">
 
-:help13
-> If you wish to append additional commands to your Docker container at run-time, you can specify them here.<br>
-> For all possible Docker run-time commands, see here: <a href="https://docs.docker.com/reference/run/" target="_blank">https://docs.docker.com/reference/run/</a>
-:end
+:docker_extra_parameters_help:
 
 _(Post Arguments)_:
 : <input type="text" name="contPostArgs">
 
-:help14
-> If you wish to append additional arguments AFTER the container definition, you can specify them here.
-> The content of this field is container specific.
-:end
+:docker_post_arguments_help:
 
 _(CPU Pinning)_:
 : <span style="display:inline-block"><?cpu_pinning()?></span>
 
-:help15
-> Checking a CPU core(s) will limit the container to run on the selected cores only. Selecting no cores lets the container run on all available cores (default)
-:end
+:docker_cpu_pinning_help:
 
 </div>
 _(Network Type)_:
@@ -903,13 +858,7 @@ _(Network Type)_:
 _(Fixed IP address)_ (_(optional)_):
 : <input type="text" name="contMyIP"><span id="myIP"></span>
 
-:help16
-> If the Bridge type is selected, the application’s network access will be restricted to only communicating on the ports specified in the port mappings section.
-> If the Host type is selected, the application will be given access to communicate using any port on the host that isn’t already mapped to another in-use application/service.
-> Generally speaking, it is recommended to leave this setting to its default value as specified per application template.
->
-> IMPORTANT NOTE:  If adjusting port mappings, do not modify the settings for the Container port as only the Host port can be adjusted.
-:end
+:docker_fixed_ip_help:
 
 </div>
 _(Console shell command)_:
@@ -921,10 +870,7 @@ _(Console shell command)_:
 _(Privileged)_:
 : <input type="checkbox" class="switch-on-off" name="contPrivileged">
 
-:help17
-> For containers that require the use of host-device access directly or need full exposure to host capabilities, this option will need to be selected.
-> For more information, see this link: <a href="https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities" target="_blank">https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities</a>
-:end
+:docker_privileged_help:
 
 <div id="configLocation"></div>
 
@@ -1084,7 +1030,14 @@ function toggleAllocations() {
 
 function load_contOverview() {
   var new_overview = $("textarea[name='contOverview']").val();
-  new_overview = new_overview.replaceAll("\n","").replaceAll("[","<").replaceAll("]",">");
+  new_overview = new_overview.replaceAll("[","<").replaceAll("]",">");
+  // if no html tags are present, treat the overview as Markdown
+  if ( stripTags(new_overview) == new_overview ) {
+    // Handle code block being created by authors indenting (manually editing the xml and spacing)
+    new_overview = new_overview.replaceAll("    ","&nbsp;&nbsp;&nbsp;&nbsp;");
+    new_overview = marked(new_overview);
+  } else 
+    new_overview = new_overview.replaceAll("\n","");
   $("#contDescription").html(new_overview);
 }
 

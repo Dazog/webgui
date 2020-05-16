@@ -171,9 +171,7 @@ _(User name)_:
 _(Description)_:
 : <input type="text" name="userDesc" maxlength="64" value="<?=htmlspecialchars($users[$name]['desc'])?>" pattern='[^&:"]*'>
 
-:help5
-> Up to 64 characters. The characters ampersand (&amp;) quote (&quot;) and colon (:) are not allowed.
-:end
+:user_edit_description_help:
 
 _(Custom image)_:
 : <span id="dropbox">
@@ -184,9 +182,7 @@ _(Custom image)_:
 <?endif;?>
   </span><em>_(Drag-n-drop a PNG file or click the image at the left)_</em><input type="file" id="drop" accept=".png" style="display:none">
 
-:help6
-> The image will be scaled to 48x48 pixels in size. The maximum image file upload size is 512 kB (524,288 bytes).
-:end
+:user_edit_custom_image_help:
 
 <?if ($name=="root"):?>
 &nbsp;
@@ -203,9 +199,7 @@ _(Password)_:
 : <input type="password" name="userPasswordGUI" maxlength="129" onKeyUp="validatePassword(this.value);this.form.cmdUserEdit.disabled=(this.form.userPasswordGUI.value != this.form.userPasswordConfGUI.value);">
   <i id="showPass" class="fa fa-eye" style="cursor:pointer" title="_(Show / Hide password)_" onclick="showPassword()"></i><span><span class="usage-disk sys none"><span id="strength-bar" style="width:0"></span><span></span></span><span id="strength-text"></span></span>
 
-:help7
-> Up to 128 characters.
-:end
+:user_password_help:
 
 _(Retype password)_:
 <input type="hidden" name="userPasswordConf" value="">

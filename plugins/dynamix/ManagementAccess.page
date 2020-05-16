@@ -139,9 +139,7 @@ _(Start page)_:
 <?foreach ($tasks as $task) echo mk_option($var['START_PAGE']??'Main', $task, $task);?>
   </select>
 
-:help58
-> Select the page which is opened first when entering the GUI. By default the *Main* page is selected.
-:end
+:mgmt_start_page_help:
 
 <!--
 Restrict access:
@@ -161,17 +159,12 @@ _(Use TELNET)_:
   <?=mk_option($var['USE_TELNET'], "yes", _('Yes'))?>
   </select>
 
-:help59
-> By default TELNET access is enabled. TELNET is an insecure type of CLI access however,
-> and it is highly recommended to use SSH access instead and disable TELNET access.
-:end
+:mgmt_use_telnet_help:
 
 _(TELNET port)_:
 : <input type="number" name="PORTTELNET" class="narrow" min="1" max="65535" value="<?=htmlspecialchars($var['PORTTELNET']??23)?>">
 
-:help60
-> Enter the TELNET port, default port is 23.
-:end
+:mgmt_telnet_port_help:
 
 _(Use SSH)_:
 : <select name="USE_SSH" onchange="updateSSH(this.form)">
@@ -179,17 +172,12 @@ _(Use SSH)_:
   <?=mk_option($var['USE_SSH'], "yes", _('Yes'))?>
   </select>
 
-:help61
-> SSH is enabled by default and offers a secure way of CLI access. Upon system startup SSH keys are automatically generated
-> if not yet existing, and stored on the flash device in the folder */config/ssh*.
-:end
+:mgmt_use_ssh_help:
 
 _(SSH port)_:
 : <input type="number" name="PORTSSH" class="narrow" min="1" max="65535" value="<?=htmlspecialchars($var['PORTSSH']??22)?>">
 
-:help62
-> Enter the SSH port, default port is 22.
-:end
+:mgmt_ssh_port_help:
 
 _(Use UPnP)_:
 : <select name="USE_UPNP">
@@ -197,9 +185,7 @@ _(Use UPnP)_:
   <?=mk_option($var['USE_UPNP'], "no", _('No'))?>
   </select>
 
-:help63
-> Enable (default) or disable the UPnP function on the server. This function allows automatic forwarding of ports on the router, only applicable when UPnP is enabled on the router itself.
-:end
+:mgmt_use_upnp_help:
 
 _(Use SSL/TLS)_:
 : <select name="USE_SSL" onchange="updateSSL(this.form)">
@@ -208,70 +194,22 @@ _(Use SSL/TLS)_:
   <?=mk_option($var['USE_SSL'], "yes", _('Yes'))?>
   </select>
 
-:help64
-> Determines how the webGUI responds to HTTP and/or HTTPS protocol.
->
-> Select **No** to disable HTTPS
->
-> Select **Yes** to enable HTTPS and redirect HTTP to HTTPS. If a Let's Encrypt SSL certificate has not
-> been provisioned, then an automatically generated self-signed SSL certificate will be used.
->
-> Select **Auto** if you are using or plan to use a Let's Encrypt SSL certificate provisioned
-> by Lime Technology. Before the certificate is provisioned, the webGUI remains
-> in http-mode. After provisioning, the webGUI automatically switches to https-mode. In addition
-> two background processes are enabled:
->
-> - *updatedns* - This starts 30 seconds after server reboot has completed and contacts the Lime Technology
-> DNS service to register the servers local IP address. Thereafter it wakes up every 10 minutes in case
-> the local IP address has changed again.
->
-> - *renewcert* - This starts 60 seconds after server reboot has completed and contacts the Lime Technology
-> certificate renewal service to determine if your Let's Encrypt SSL certificate needs to be renewed.
-> Thereafter it wakes up every 24 hours. If within 30 days of expiration, a new certificate is automatically
-> provisioned and downloaded to your server.
->
-> Note: After provisioning a Let's Encrypt SSL certificate you may turn off the *updatedns* and *newcert*
-> background processes by changing this field to **Yes**.
->
-> **nginx certificate handling details**
->
-> The nginx startup script looks for a SSL certificate on the USB boot flash in this order:<br>
-> `config/ssl/certs/certificate_bundle.pem`<br>
-> `config/ssl/certs/<server-name>_unraid_bundle.pem`
->
-> If neither file exists, a self-signed SSL certificate is automatically created and stored in<br>
-> `config/ssl/certs/<server-name>_unraid_bundle.pem`<br>
->
-> Provisioning a Let's Encrypt certificate writes the certificate to<br>
-> `config/ssl/certs/certificate_bundle.pem`<br>
->
-> **nginx stapling support**
->
-> Whether nginx enables OCSP Staping is determined by which certificate is in use:<br>
-> `config/ssl/certs/certificate_bundle.pem` => Yes<br>
-> `config/ssl/certs/<server-name>_unraid_bundle.pem` => No
-:end
+:mgmt_use_ssl_tls_help:
 
 _(HTTP port)_:
 : <input type="number" name="PORT" class="narrow" min="1" max="65535" value="<?=htmlspecialchars($var['PORT']??80)?>">
 
-:help65
-> Enter the HTTP port, default port is 80.
-:end
+:mgmt_http_port_help:
 
 _(HTTPS port)_:
 : <input type="number" name="PORTSSL" class="narrow" min="1" max="65535" value="<?=htmlspecialchars($var['PORTSSL']??443)?>">
 
-:help66
-> Enter the HTTPS port, default port is 443.
-:end
+:mgmt_https_port_help:
 
 _(Local TLD)_:
 : <input type="text" name="LOCAL_TLD" class="narrow" value="<?=htmlspecialchars($var['LOCAL_TLD'])?>">
 
-:help67
-> Enter your local Top Level Domain. May be blank.
-:end
+:mgmt_local_tld_help:
 
 &nbsp;
 : <input type="button" value="_(Apply)_" onclick="checkPorts(this.form)" disabled><input type="button" value="_(Done)_" onclick="done()">
@@ -293,46 +231,6 @@ _(Certificate expiration)_:
 &nbsp;
 : <button type="button" onclick="provisionSSL(this)" <?=$disabled_provision?>><?=$provisionlabel?></button><button type="button" onclick="updateDNS(this)" <?=$disabled_updatedns?>>_(Update DNS)_</button>
 
-:help68
-> **Provision** may be used to allocate a *free* SSL Certficiate from [Let's Encrypt](https://letsencrypt.org/) and
-> then upload to your server. Note: We **highly** recommend using a static IP address in this case.
-
-> **Update DNS** may be used to manually initiate updating the DNS A-record of your server FQDN on unraid.net. Note
-> that DNS propagation change could take anywhere from 1 minute to several hours (we set TTL to 60 seconds).
-
-> Note: **Provision** may fail if your router or upstream DNS server has
-> [DNS rebinding protection](https://en.wikipedia.org/wiki/DNS_rebinding) enabled. DNS rebinding
-> protection prevents DNS from resolving a private IP network range. DNS rebinding protection is meant as
-> a security feature on a local LAN which includes legacy devices with buggy/insecure "web" interfaces.
-
-> One source of DNS rebinding protection could be your ISP DNS server. In this case the problem may be solved by
-> switching to a different DNS server such as Google's public DNS.
-
-> More commonly, DNS rebinding protection could be enabled in your router. Most consumer routers do not implement DNS
-> rebinding protection; but, if they do, a configuration setting should be available to turn it off.
-
-> Higher end routers usually do enable DNS rebinding protection however. Typically there are ways of turning it off
-> entirely or selectively based on domain. Examples:
-
-> **DD-WRT:** If you are using "dnsmasq" with DNS rebinding protection enabled, you can add this line to your router
-> configuration file:
-
-> `rebind-domain-ok=/unraid.net/`
-
-> **pfSense:** If you are using pfSense internal DNS resolver service, you can add these Custom Option lines:
-
-> `server:`<br>
-> `private-domain: "unraid.net"`
-
-> **Ubiquiti USG router:** you can add this configuration line:
-
-> `set service dns forwarding options rebind-domain-ok=/unraid.net/`
-
-> **OpenDNS:** Go to Settings -> Security and *remove* the checkbox next to
->  "Suspicious Responses - Block internal IP addresses". It is an all-or-nothing setting.
-
-> When all else fails, you can create an entry in your PC's *hosts* file to override external DNS and
-> directly resolve your servers unraid.net FQDN to its local IP address.
-:end
+:mgmt_certificate_expiration_help:
 
 </form>

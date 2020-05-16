@@ -54,13 +54,13 @@ function caPluginUpdateCheck(plugin,options=[],callback) {
 		if ( options.debug == true ) result.updateAvailable = true;
 		if ( ! options.element && ! options.dontShow ) {
 			if ( result.updateAvailable ) {
-				var HTML = result.updateMessage+" <a class='ca_PluginUpdateInstall' onclick='ca_pluginUpdateInstall(&quot;"+plugin+"&quot;);'>"+result.linkMessage+"</a> <a class='bannerInfo fa fa-info-circle' onclick=ca_pluginUpdateShowInfo('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=%2Ftmp%2Fplugins%2F"+pluginFilename+".txt','_(Release Notes)_',600,900); return false;'></a>";
+				var HTML = result.updateMessage+" <a class='ca_PluginUpdateInstall' onclick='ca_pluginUpdateInstall(&quot;"+plugin+"&quot;);'>"+result.linkMessage+"</a> <a class='bannerInfo fa fa-info-circle' onclick='ca_pluginUpdateShowInfo(&quot;/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=%2Ftmp%2Fplugins%2F"+pluginFilename+".txt&quot;,&quot;_(Release Notes)_&quot;,600,900); return false;'></a>";
 				addBannerWarning(HTML,false,options.noDismiss);
 			}
 		} else {
 			if ( $.cookie(plugin) != result.version ) {
 				if ( result.updateAvailable ) {
-					var HTML = result.updateMessage+" <a class='ca_PluginUpdateInstall' onclick='ca_pluginUpdateInstall(&quot;"+plugin+"&quot;);'>"+result.linkMessage+"</a> <a class='bannerInfo fa fa-info-circle' onclick=ca_pluginUpdateShowInfo('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=%2Ftmp%2Fplugins%2F"+pluginFilename+".txt','_(Release Notes)_',600,900); return false;'></a>";
+					var HTML = result.updateMessage+" <a class='ca_PluginUpdateInstall' onclick='ca_pluginUpdateInstall(&quot;"+plugin+"&quot;);'>"+result.linkMessage+"</a> <a class='bannerInfo fa fa-info-circle' onclick='ca_pluginUpdateShowInfo(&quot;/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=%2Ftmp%2Fplugins%2F"+pluginFilename+".txt&quot;,&quot;_(Release Notes)_&quot;,600,900); return false;'></a>";
 					if ( ! options.noDismiss ) {
 						HTML = HTML.concat("<span class='ca_PluginUpdateDismiss'><i class='fa fa-close' onclick='ca_hidePluginUpdate(&quot;"+plugin+"&quot;,&quot;"+result.version+"&quot;,&quot;"+options.element+"&quot;);'></i>");
 					}

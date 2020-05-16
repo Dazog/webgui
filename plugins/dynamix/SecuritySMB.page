@@ -20,15 +20,7 @@ require_once "$docroot/webGui/include/InputSecurity.php";
 
 $width = [123,300];
 ?>
-:help15
-> *Read settings from* is used to preset the SMB security settings of the current selected share with the settings of an existing share.
->
-> Select the desired share name and press **Read** to copy the SMB security settings from the selected source.
->
-> *Write settings to* is used to copy the SMB security settings of the current selected share to one or more other existing shares.
->
-> Select the desired destinations and press **Write** to copy the SMB security settings to the selected shares.
-:end
+:smb_security_help:
 
 <div class="clone1">
 <span class="clone">_(Read settings from)_</span><i class="fa fa-arrow-left fa-fw"></i>
@@ -73,10 +65,7 @@ _(Export)_:
   <?=mk_option($sec[$name]['export'], "eh", _('Yes (hidden)'))?>
   </select>
 
-:help16
-> This setting determines whether the share is visible and/or accessible.  The 'Yes (hidden)' setting
-> will *hide* the share from *browsing* but is still accessible if you know the share name.
-:end
+:smb_export_help:
 
 <input type="hidden" name="shareVolsizelimit" value="">
 <?else:?>
@@ -89,18 +78,12 @@ _(Export)_:
   <?=mk_option($sec[$name]['export'], "eth", _('Yes/Time Machine (hidden)'))?>
   </select>
 
-:help17
-> This setting determines whether the share is visible and/or accessible.  The 'Yes (hidden)' setting
-> will *hide* the share from *browsing* but is still accessible if you know the share name.
-:end
+:smb_export_help:
 
 _(Time Machine volume size limit)_:
 : <input type="text" name="shareVolsizelimit" maxlen="20" value="<?=$sec[$name]['volsizelimit']?>"> MB
 
-:help18
-> This limits the reported volume size, preventing Time Machine from using the entire real disk space
-> for backup.  For example, setting this value to "1024" would limit the reported disk space to 1GB.
-:end
+:smb_time_machine_volume_help:
 
 <?endif;?>
 <?if ($name!='flash'):?>
@@ -111,24 +94,7 @@ _(Case-sensitive names)_:
   <?=mk_option($sec[$name]['caseSensitive'], "forced", _("Force lower"))?>
   </select>
 
-:help201
-> Controls whether filenames are case-sensitive.
->
-> The default setting of **auto** allows clients that support case sensitive filenames (Linux CIFSVFS)
-> to tell the Samba server on a per-packet basis that they wish to access the file system in a case-sensitive manner (to support UNIX
-> case sensitive semantics). No Windows system supports case-sensitive filenames so setting this option to **auto** is the same as
-> setting it to No for them; however, the case of filenames passed by a Windows client will be preserved.  This setting can result
-> in reduced peformance with very large directories because Samba must do a filename search and match on passed names.
->
-> A setting of **Yes** means that files are created with the case that the client passes, and only accessible using this same case.
-> This will speed very large directory access, but some Windows applications may not function properly with this setting.  For
-> example, if "MyFile" is created but a Windows app attempts to open "MYFILE" (which is permitted in Windows), it will not be found.
->
-> A value of **Forced lower** is special: the case of all incoming client filenames, not just new filenames, will be set to lower-case.
-> In other words, no matter what mixed case name is created on the Windows side, it will be stored and accessed in all lower-case.  This
-> ensures all Windows apps will properly find any file regardless of case, but case will not be preserved in folder listings.
-> Note this setting should only be configured for new shares.
-:end
+:smb_case_sensitive_names_help:
 
 <?endif;?>
 _(Security)_:
@@ -138,17 +104,7 @@ _(Security)_:
   <?=mk_option($sec[$name]['security'], "private", _('Private'))?>
   </select>
 
-:help19
-> Summary of security modes:
->
-> **Public** All users including guests have full read/write access.
->
-> **Secure** All users including guests have read access, you select which of your users
-> have write access.
->
-> **Private** No guest access at all, you select which of your users have read/write or
-> read-only access.
-:end
+:smb_security_modes_help:
 
 &nbsp;
 : <input type="submit" name="changeShareSecurity" value="_(Apply)_" disabled><input type="button" value="_(Done)_" onclick="done()">
@@ -157,15 +113,7 @@ _(Security)_:
 <?if ($sec[$name]['security']=='secure'):?>
 <div id="title" class="nocontrol"><dt>_(SMB)_ _(User Access)_</dt><i>_(Guests have **read-only** access)_.</i></div>
 
-:help20
-> *Read settings from* is used to preset the SMB User Access settings of the current selected share with the settings of an existing share.
->
-> Select the desired share name and press **Read** to copy the SMB security settings from the selected source.
->
-> *Write settings to* is used to copy the SMB User Access settings of the current share to one or more other existing shares.
->
-> Select the desired destinations and press **Write** to copy the SMB User access settings to the selected shares.
-:end
+:smb_secure_access_help:
 
 <div class="clone1">
 <span class="clone">_(Read settings from)_</span><i class="fa fa-arrow-left fa-fw"></i>
@@ -207,15 +155,7 @@ foreach ($rows as $row) echo $row;
 <?elseif ($sec[$name]['security']=='private'):?>
 <div id="title" class="nocontrol"><dt>_(SMB)_ _(User Access)_</dt><i>_(Guests have **no** access)_.</i></div>
 
-:help21
-> *Read settings from* is used to preset the SMB User Access settings of the current selected share with the settings of an existing share.
->
-> Select the desired share name and press **Read** to copy the SMB security settings from the selected source.
->
-> *Write settings to* is used to copy the SMB User Access settings of the current share to one or more other existing shares.
->
-> Select the desired destinations and press **Write** to copy the SMB User access settings to the selected shares.
-:end
+:smb_private_access_help:
 
 <div class="clone1">
 <span class="clone">_(Read settings from)_</span><i class="fa fa-arrow-left fa-fw"></i>

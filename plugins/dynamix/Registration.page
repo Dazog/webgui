@@ -37,7 +37,7 @@ div.remark{padding:0 10px;text-align:justify;}
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
 <span class="thanks">_(Thank you for trying Unraid OS)_!</span>
 <div markdown="1" class="remark">
-:plug8
+:registration_1_plug:
 Your server will not be usable until you purchase a Registration key or install a free 30-day *Trial* key. A *Trial*
 key provides all the functionality of a *Pro* Registration key.
 
@@ -48,7 +48,7 @@ Note: USB memory card readers are generally **not** supported because most do no
 :end
 <span class="red-text">_(Important)_:</span>
 
-:plug9
+:registration_2_plug:
 + Please make sure your [server time](DateTime) is accurate to within 5 minutes.
 + Please make sure there is a [DNS server](NetworkSettings) specified.
 :end
@@ -75,7 +75,7 @@ _(Flash GUID)_:
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
 <span class="thanks">_(Thank you for trying Unraid OS)_!</span>
 <div markdown="1" class="remark">
-:plug10
+:registration_3_plug:
 Your *Trial* key includes all the functionality and device support of a *Pro* Registration key.
 
 After your *Trial* key has reached expiration, your server **still functions normally** until the next time you **Stop** the array.
@@ -167,7 +167,7 @@ _(Flash GUID)_:
 <span class="thanks">_(Thank you for trying Unraid OS)_!</span>
 <div markdown="1" class="remark">
 <span class='red-text'>_(Your *Trial* key has expired)_.</span>
-:plug11
+:registration_4_plug:
 To continue using Unraid OS you may purchase a Registration key. Alternately, you may request a *Trial* extension key.
 
 Most *Trial* extension requests are processed immediately but please allow up to one business day to receive your *Trial* extension key.
@@ -195,7 +195,7 @@ _(Flash GUID)_:
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
 <span class='thanks red'>_(Invalid *Trial* Installation)_</span>
 <div markdown="1" class="remark">
-:plug12
+:registration_5_plug:
 It is not possible to use a *Trial* key with an existing Unraid OS installation.
 
 You may purchase a Registration key corresponding to this USB Flash device to continue using this installation.
@@ -313,7 +313,7 @@ _(Flash GUID)_:
 <input type="hidden" name="deviceCount" value="<?=$var['deviceCount']?>">
 <span class='thanks red'>_(Missing Key File)_</span>
 <div markdown="1" class="remark">
-:plug13
+:registration_6_plug:
 It appears that your Registration key file is corrupted or missing.  The key file should be located in the
 [config](/Registration/Browse?dir&#61;/boot/config) directory on your USB Flash boot device.
 
@@ -345,7 +345,7 @@ _(Flash GUID)_:
 <span class='thanks red'>_(The registered GUID does not match the USB Flash boot device GUID)_</span>
 <?if (strstr($var['regTy'], "Trial")):?>
 <div markdown="1" class="remark">
-:plug14
+:registration_7_plug:
 *Trial* installations are only valid with the originally registered USB Flash device.
 
 To continue using this installation with this USB Flash device, you may purchase a Registration key.
@@ -353,7 +353,7 @@ To continue using this installation with this USB Flash device, you may purchase
 </div>
 <?else:?>
 <div markdown="1" class="remark">
-:plug15
+:registration_8_plug:
 The Registration key file does not correspond to the USB Flash boot device.
 Please copy the correct key file to the [config](/Registration/Browse?dir&#61;/boot/config) directory
 on your USB Flash boot device. If you do not have a backup copy of your key file, [Contact Support](https://lime-technology.com/contact).
@@ -416,7 +416,7 @@ _(Replaceable)_:
 <?if (strstr($var['regTy'], "blacklisted")):?>
 <span class='thanks red'>_(Blacklisted USB Flash GUID)_</span>
 <div markdown="1" class="remark">
-:plug16
+:registration_9_plug:
 This USB Flash boot device has been *blacklisted*. This can occur as a result of transfering your Registration key to
 a replacement USB Flash device, and you are currently booted from your old USB Flash device.
 

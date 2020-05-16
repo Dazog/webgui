@@ -68,6 +68,4 @@ foreach (glob("/boot/config/plugins-stale/*.plg", GLOB_NOSORT) as $plugin_file) 
 
 echo "</tbody></table>";
 ?>
-:help3
-> These plugins were not installed because newer code already exists.  It is safe to simply delete these.
-:end
+:plugin_stale_help:

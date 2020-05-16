@@ -1,4 +1,4 @@
-Menu="Buttons:2"
+Menu="Buttons:3"
 Title="Terminal"
 Icon="icon-u-terminal"
 Href="/webterminal/"

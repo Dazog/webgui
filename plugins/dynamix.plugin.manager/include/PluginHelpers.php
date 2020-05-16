@@ -20,6 +20,13 @@ function plugin($method, $arg = '') {
   return $retval==0 ? implode("\n", $output) : false;
 }
 
+// Invoke the language command with indicated method
+function language($method, $arg = '') {
+  global $docroot;
+  exec("$docroot/plugins/dynamix.plugin.manager/scripts/language ".escapeshellarg($method)." ".escapeshellarg($arg), $output, $retval);
+  return $retval==0 ? implode("\n", $output) : false;
+}
+
 function check_plugin($arg, &$ncsi) {
 // Get network connection status indicator (NCSI)
   if ($ncsi===null) passthru("wget --quiet --spider --timeout=10 --tries=1 http://www.msftncsi.com/ncsi.txt",$ncsi);

@@ -227,9 +227,9 @@ function updateMode(form,mode) {
 }
 function validate(poolname) {
   var valid = /^[a-z_]([a-z0-9_-]*[a-z_])*$/;
-  var reserved = [<?=implode(',',array_map('escapeshellarg',explode(',',$var['reservedNames'])))?>];
-  var shares = [<?=implode(',',array_map('escapeshellarg',array_filter(array_map('sharename',scandir('boot/config/shares')))))?>];
-  var pools = [<?=implode(',',array_map('escapeshellarg',$pools))?>];
+  var reserved = [<?=implode(',',array_map('escapestring',explode(',',$var['reservedNames'])))?>];
+  var shares = [<?=implode(',',array_map('escapestring',array_filter(array_map('sharename',scandir('boot/config/shares')))))?>];
+  var pools = [<?=implode(',',array_map('escapestring',$pools))?>];
   if (!poolname.trim()) return false;
   if (reserved.includes(poolname)) {
     swal({title:'_(Invalid pool name)_',text:'_(Do not use reserved names)_',type:'error',confirmButtonText:'_(Ok)_'});
@@ -340,10 +340,7 @@ _(Name)_:
 _(Comments)_:
 : <input type="text" name="diskComment.<?=$disk['idx']?>" maxlength="256" value="<?=htmlspecialchars($disk['comment'])?>">
 
-:help12
-> This text will appear under the *Comments* column for the share in Windows Explorer.
-> Enter anything you like, up to 256 characters.
-:end
+:info_comments_help:
 
 _(Partition size)_:
 : <?=my_number($disk['sizeSb'])?> KB (K=1024)
@@ -377,20 +374,12 @@ _(Spin down delay)_:
 _(Warning disk temperature threshold)_ (&deg;<?=$display['unit']?>):
 : <input type="number" min="0" max="300" name="<?=htmlspecialchars($name)?>_hotTemp" class="narrow" value="<?=strlen($disk['hotTemp'])?displayTemp($disk['hotTemp']):''?>" placeholder="<?=displayTemp($display['hot'])?>">
 
-:help9
-> *Warning disk temperature* sets the warning threshold for this hard disk temperature. Exceeding this threshold will result in a warning notification.
->
-> A value of zero will disable the warning threshold (including notifications).
-:end
+:info_warning_temp_help:
 
 _(Critical disk temperature threshold)_ (&deg;<?=$display['unit']?>):
 : <input type="number" min="0" max="300" name="<?=htmlspecialchars($name)?>_maxTemp" class="narrow" value="<?=strlen($disk['maxTemp'])?displayTemp($disk['maxTemp']):''?>" placeholder="<?=displayTemp($display['max'])?>">
 
-:help10
-> *Critical disk temperature* sets the critical threshold for this hard disk temperature. Exceeding this threshold will result in an alert notification.
->
-> A value of zero will disable the critical threshold (including notifications).
-:end
+:info_critical_temp_help:
 
 <?if ($disk['type']=="Data" || in_array($tag,$pools)):?>
 _(File system status)_:
@@ -410,10 +399,7 @@ _(File system type)_:
   <?=mk_option($disk['fsType'], "luks:reiserfs", _('reiserfs')." - "._('encrypted'))?>
   </select>
 
-:help11
-> Enter the desired file system type.  Changing the file system type of a device will permit you to reformat
-> that device using the new file system.  Be aware that **all existing data on the device will be lost**.
-:end
+:info_file_system_help:
 
 <?elseif (isset($disk['slots']) && $disk['slots']>1):?>
 _(File system type)_:
@@ -434,44 +420,18 @@ _(File system type)_:
 _(Minimum free space)_:
 : <input type="text" name="diskFloor.<?=$disk['idx']?>" maxlength="16" value="<?=$disk['diskFloor']?>" class="narrow" <?=$disabled?> placeholder="0">
 
-:help41
-> This defines a "floor" for the amount of free space remaining in the volume.
-> If the free space becomes less than this value, then new files written via user shares will fail with "not enough space" error.
->
-> Enter a numeric value with one of these suffixes:
->
-> **KB** = 1,000<br>
-> **MB** = 1,000,000<br>
-> **GB** = 1,000,000,000<br>
-> **TB** = 1,000,000,000,000<br>
-> **K** = 1,024 (ie, 2^10)<br>
-> **M** = 1,048,576 (ie, 2^20)<br>
-> **G** = 1,073,741,824 (ie, 2^30)<br>
-> **T** = 1,099,511,627,776 (ie, 2^40)<br>
->
-> If no suffix, a count of 1024-byte blocks is assumed.
-:end
+:info_free_space_help:
 
 <?endif;?>
 _(Warning disk utilization threshold)_ (%):
 : <input type="number" min="0" max="100" name="<?=htmlspecialchars($name)?>_warning" class="narrow" value="<?=strlen($disk['warning'])?$disk['warning']:''?>" placeholder="<?=$display['warning']?>">
 
-:help13
-> *Warning disk utilization* sets the warning threshold for this hard disk utilization. Exceeding this threshold will result in a warning notification.
->
-> When the warning threshold is set equal or greater than the critical threshold, there will be only critical notifications (warnings are not existing).
->
-> A value of zero will disable the warning threshold (including notifications).
-:end
+:info_warning_utilization_help:
 
 _(Critical disk utilization threshold)_ (%):
 : <input type="number" min="0" max="100" name="<?=htmlspecialchars($name)?>_critical" class="narrow" value="<?=strlen($disk['critical'])?$disk['critical']:''?>" placeholder="<?=$display['critical']?>")>
 
-:help14
-> *Critical disk utilization* sets the critical threshold for this hard disk utilization. Exceeding this threshold will result in an alert notification.
->
-> A value of zero will disable the critical threshold (including notifications).
-:end
+:info_critical_utilization_help:
 
 <?endif;?>
 &nbsp;
@@ -516,24 +476,7 @@ _(btrfs balance status)_:
   *_(Perform full balance)_*
 <?endif;?>
 
-:help15
-> **Balance** will run the *btrfs balance* program to restripe the extents across all pool devices, for example,
-> to convert the pool from raid1 to raid0 or vice-versa.
->
-> When a *full balance* is perfomred, it basically rewrites everything in the current filesystem.
->
-> A *mode conversion* affects the btrfs data extents; metadata always uses raid1 and is converted to raid1 if necessary by any balance operation.
->
-> The run time is potentially very long, depending on the filesystem size and speed of the device.
->
-> Unraid uses these default options when creating a multiple-device pool:
->
-> `-dconvert=raid1 -mconvert=raid1`
->
-> For more complete documentation, please refer to the btrfs-balance [Manpage](https://btrfs.wiki.kernel.org/index.php/Manpage/btrfs-balance)
->
-> *Note: raid5 and raid6 are generally still considered **experimental** by the Linux community*
-:end
+:info_btrfs_balance_help:
 
 <?else:?>
 <input type="hidden" name="#command" value="/webGui/scripts/btrfs_balance">
@@ -543,9 +486,7 @@ _(btrfs balance status)_:
 &nbsp;
 : <input type="submit" value="_(Cancel)_">
 
-:help16
-> **Cancel** will cancel the balance operation in progress.
-:end
+:info_balance_cancel_help:
 
 <?endif;?>
 <?else:?>
@@ -574,12 +515,7 @@ _(btrfs scrub status)_:
 &nbsp;
 : <input type="submit" value="_(Scrub)_"><label><input type="checkbox" name="#arg[3]" value=""> _(Repair corrupted blocks)_</label>
 
-:help17
-> **Scrub** runs the *btrfs scrub* program which will read all data and metadata blocks from all
-> devices and verify checksums.
->
-> If *Repair corrupted blocks* is checked, *btrfs scrub* will repair corrupted blocks if there’s a correct copy available.
-:end
+:info_btrfs_scrub_help:
 
 <?else:?>
 <input type="hidden" name="#command" value="/webGui/scripts/btrfs_scrub">
@@ -589,9 +525,7 @@ _(btrfs scrub status)_:
 &nbsp;
 : <input type="submit" value="_(Cancel)_">
 
-:help18
-> **Cancel** will cancel the Scrub operation in progress.
-:end
+:info_scrub_cancel_help:
 
 <?endif;?>
 <?else:?>
@@ -620,17 +554,7 @@ _(btrfs check status)_:
 &nbsp;
 : <input type="submit" value="_(Check)_"><input type="text" name="#arg[4]" class="narrow" maxlength="256" value="--readonly"> _(Options (see Help))_
 
-:help19
-> **Check** will run the *btrfs check* program to check file system integrity on the device.
->
-> The *Options* field is initialized with *--readonly* which specifies check-only.  If repair is needed, you should run
-> a second Check pass, setting the *Options* to *--repair*; this will permit *btrfs check* to fix the file system.
->
-> After starting a Check, you should Refresh to monitor progress and status.  Depending on
-> how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
-> Not much info is printed in the window, but you can verify the operation is running by observing the read/write counters
-> increasing for the device on the Main page.
-:end
+:info_btrfs_check_help:
 
 <?else:?>
 <input type="hidden" name="#command" value="/webGui/scripts/btrfs_check">
@@ -641,9 +565,7 @@ _(btrfs check status)_:
 &nbsp;
 : <input type="submit" value="_(Cancel)_"> *_(Running)_*
 
-:help20
-> **Cancel** will cancel the Check operation in progress.
-:end
+:info_check_cancel_help:
 
 <?endif;?>
 <?else:?>
@@ -678,18 +600,7 @@ _(reiserfsck status)_:
 &nbsp;
 : <input type="submit" value="_(Check)_"><input type="text" name="#arg[4]" class="narrow" maxlength="256" value=""> _(Options (see Help))_
 
-:help21
-> **Check** will run the *reiserfsck* program to check file system integrity on the device.
->
-> The *Options* field may be filled in with specific options used to fix problems in the file system. Typically, you
-> first run a Check pass leaving *Options* blank.  Upon completion, if *reiserfsck* finds any problems, you must
-> run a second Check pass, using a specific option as instructed by the first *reiserfsck* pass.
->
-> After starting a Check you should Refresh to monitor progress and status.  Depending on
-> how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
-> Not much info is printed in the window, but you can verify the operation is running by observing the read/write counters
-> increasing for the device on the Main page.
-:end
+:info_reiserfs_check_help:
 
 <?else:?>
 <input type="hidden" name="#command" value="/webGui/scripts/reiserfs_check">
@@ -700,9 +611,7 @@ _(reiserfsck status)_:
 &nbsp;
 : <input type="submit" value="_(Cancel)_"> *_(Running)_*
 
-:help22
-> **Cancel** will cancel the Check operation in progress.
-:end
+:info_reiserfs_cancel_help:
 
 <?endif;?>
 <?else:?>
@@ -731,17 +640,7 @@ _(xfs_repair status)_:
 &nbsp;
 : <input type="submit" value="_(Check)_"><input type="text" name="#arg[4]" class="narrow" maxlength="256" value="-n"> _(Options (see Help))_
 
-:help23
-> **Check** will run the *xfs_repair* program to check file system integrity on the device.
->
-> The *Options* field is initialized with *-n* which specifies check-only.  If repair is needed, you should run
-> a second Check pass, setting the *Options* blank; this will permit *xfs_repair* to fix the file system.
->
-> After starting a Check, you should Refresh to monitor progress and status.  Depending on
-> how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
-> Not much info is printed in the window, but you can verify the operation is running by observing the read/write counters
-> increasing for the device on the Main page.
-:end
+:info_xfs_check_help:
 
 <?else:?>
 <input type="hidden" name="#command" value="/webGui/scripts/xfs_check">
@@ -751,9 +650,7 @@ _(xfs_repair status)_:
 &nbsp;
 : <input type="submit" value="_(Cancel)_"> *_(Running)_*
 
-:help24
-> **Cancel** will cancel the Check operation in progress.
-:end
+:info_xfs_cancel_help:
 
 <?endif;?>
 <?else:?>
@@ -781,11 +678,7 @@ _(SMART notification value)_:
   <?=mk_option($disk['smSelect'], "1", _('Normalized'))?>
   </select>
 
-:help25
-> SMART notifications are generated on either an increasing RAW value of the attribute, or a decreasing NORMALIZED value which reaches a predefined threshold set by the manufacturer.
->
-> Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
-:end
+:info_smart_notifications_help:
 
 _(SMART notification tolerance level)_:
 : <select name="smLevel">
@@ -799,11 +692,7 @@ _(SMART notification tolerance level)_:
   <?=mk_option($disk['smLevel'], "1.50", "50%")?>
   </select>
 
-:help26
-> A tolerance level may be given to prevent that small changes result in a notification. Setting a too high tolerance level may result in critical changes without a notification.
->
-> Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
-:end
+:info_tolerance_level_help:
 
 _(SMART controller type)_:
 : <select name="smType" onchange="setGlue(this.form,true)">
@@ -826,12 +715,7 @@ _(SMART controller type)_:
   <input type="text" name="smPort3" value="<?=$disk['smPort3']?>" class="option"><select name="smPort3" class="narrow" style="display:none" disabled></select><span id="devtext" class="devtext">/dev/</span>
   <input type="text" name="smDevice" value="<?=$disk['smDevice']??''?>" class="option" placeholder="<?=htmlspecialchars($disk['device'])?>"><span id="helptext" class="helptext">enter disk index and device name as applicable to your controller</span>
 
-:help27
-> By default automatic controller selection is done by smartctl to read the SMART information. Certain controllers however need specific settings for smartctl to work.
-> Use this setting to select your controller type and fill-in the specific disk index and device name for your situation. Use the manufacturer's documentation to find the relevant information.
->
-> Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
-:end
+:info_controller_type_help:
 
 _(SMART attribute notifications)_:
 : <input type="text" name="smCustom" value="<?=$disk['smCustom']??$var['smCustom']?>" class="narrow">_(Custom attributes (use comma to separate numbers))_
@@ -841,14 +725,7 @@ _(SMART attribute notifications)_:
 : <input type="checkbox" name="at<?=$x?>" value="<?=$preselect[$x]['code']?>"<?=in_array($preselect[$x]['code'],$events)?' checked':''?>><span class="code">_(Attribute)_ = <?=$preselect[$x]['code']?></span><?=$preselect[$x]['text']?>
 <?endfor;?>
 
-:help28
-> The user can enable or disable notifications for the given SMART attributes. It is recommended to keep the default, which is ALL selected attributes,
-> when certain attributes are not present on your hard disk or do not provide the correct information, these may be excluded.
-> In addition custom SMART attributes can be entered to generate notifications. Be careful in this selection,
-> it may cause an avalance of notifcations if inappropriate SMART attributes are chosen.
->
-> Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
-:end
+:info_attribute_notifications_help:
 
 <input type="submit" name="#default" value="_(Default)_">
 : <input type="submit" name="#apply" value="_(Apply)_" disabled><input type="button" value="_(Done)_" onclick="done()">
@@ -871,4 +748,3 @@ _(Name)_:
 <input type="hidden" name="poolName" value="<?=$name?>">
 <input type="hidden" name="poolSlots" value="0">
 </form>
-

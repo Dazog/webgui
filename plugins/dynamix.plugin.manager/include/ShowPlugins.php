@@ -151,9 +151,10 @@ foreach (glob($plugins,GLOB_NOSORT) as $plugin_link) {
   echo "<td>";
   if ($system) {
     if ($os) {
+      $regular = ['stable','next'];
       echo "<select id='change_branch' class='auto' onchange='update_table(this.value)'>";
-      echo mk_options($category,'stable');
-      echo mk_options($category,'next');
+      foreach ($regular as $choice) echo mk_options($category,$choice);
+      if (!in_array($category,$regular)) echo mk_options($category,$category);
       echo "</select>";
     }
   } else {

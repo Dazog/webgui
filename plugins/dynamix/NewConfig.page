@@ -48,7 +48,7 @@ $(function() {
 });
 </script>
 
-:plug4
+:newconfig_plug:
 This is a utility to reset the array disk configuration so that all disks appear as "New" disks, as
 if it were a fresh new server.
 

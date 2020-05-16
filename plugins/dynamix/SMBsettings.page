@@ -23,12 +23,7 @@ _(Enable SMB)_:
   <?=mk_option($var['shareSMBEnabled'], "ads", _('Yes').' ('._('Active Directory').')')?>
   </select>
 
-:help72
-> Select 'Yes (Workgroup)' to enable SMB (Windows Networking) protocol support. This
-> also enables Windows host discovery.
->
-> Select 'Yes (Active Directory)' to enable Active Directory integration.
-:end
+:smb_enable_help:
 
 _(Hide "dot" files)_:
 : <select name="hideDotFiles" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
@@ -36,13 +31,7 @@ _(Hide "dot" files)_:
   <?=mk_option($var['hideDotFiles'], "yes", _('Yes'))?>
   </select>
 
-:help73
-> If set to 'Yes' then files starting with a '.' (dot) will appear as *hidden files* and normally
-> will not appear in Windows folder lists unless you have "Show hidden files, folders, and drives" enabled
-> in Windows Folder Options.
-
-> If set to 'No' then dot files will appear in folder lists the same as any other file.
-:end
+:smb_hide_files_help:
 
 _(Enhanced macOS interoperability)_:
 : <select name="enableFruit" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
@@ -50,11 +39,7 @@ _(Enhanced macOS interoperability)_:
   <?=mk_option($var['enableFruit'], "yes", _('Yes'))?>
   </select>
 
-:help74
-> When set to 'Yes' provides enhanced compatibility with Apple SMB clients, resulting, for example, in faster
-> Finder browsing, and ability to export Time Machine shares.  This may cause some issues with Windows clients, however.
-> Please also refer to the [VFS_FRUIT MAN PAGE](https://www.mankier.com/8/vfs_fruit).
-:end
+:smb_enhanced_macos_help:
 
 _(Enable NetBIOS)_:
 : <select name="USE_NETBIOS" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
@@ -62,10 +47,7 @@ _(Enable NetBIOS)_:
   <?=mk_option($var['USE_NETBIOS'], "yes", _('Yes'))?>
   </select>
 
-:help75
-> Select 'Yes' to enable NetBIOS.  If enabled, SMBv1 protocol will also be recognized.  If disabled,
-> clients must use SMBv2 or higher.
-:end
+:smb_enable_netbios_help:
 
 _(Enable WSD)_:
 : <select name="USE_WSD" onchange="checkWSDSettings()" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
@@ -73,18 +55,12 @@ _(Enable WSD)_:
   <?=mk_option($var['USE_WSD'], "yes", _('Yes'))?>
   </select>
 
-:help76
-> Select 'Yes' to enable WSD (WS-Discovery).  The only reason to turn this off is when you are running an
-> old LAN setup based on SMBv1.
-:end
+:smb_enable_wsd_help:
 
 _(WSD options [experimental])_:
 : <input type="text" name="WSD_OPT" maxlength="80" class="narrow" value="<?=htmlspecialchars($var['WSD_OPT'])?>" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
 
-:help77
-> This is a command line otions string passed to the WSD daemon upon startup. Leave this field blank unless
-> instructed by support to put something here.
-:end
+:smb_wsd_options_help:
 
 &nbsp;
 : <input type="submit" name="changeShare" value="_(Apply)_" disabled><input type="button" value="_(Done)_" onclick="done()"><?if ($var['fsState']=="Started"):?>*_(Array must be **Stopped** to change)_*<?endif;?>

@@ -1,8 +1,3 @@
-Menu="Buttons:7"
-Title="Help"
-Icon="icon-u-help"
-Code="e934"
----
 <?PHP
 /* Copyright 2005-2020, Lime Technology
  * Copyright 2012-2020, Bergware International.
@@ -15,14 +10,14 @@ Code="e934"
  * all copies or substantial portions of the Software.
  */
 ?>
-<script>
-function HelpButton() {
-  if ($('#nav-item.HelpButton').toggleClass('active').hasClass('active')) {
-    $('.inline_help').show('slow');
-    $.cookie('help','help',{path:'/'});
-  } else {
-    $('.inline_help').hide('slow');
-    $.removeCookie('help',{path:'/'});
+<?
+$old = (is_file("/boot/config/vfio-pci.cfg")) ? rtrim(file_get_contents("/boot/config/vfio-pci.cfg")) : '';
+$new = $_GET["cfg"];
+if ($old !== $new) {
+  exec("cp -f /boot/config/vfio-pci.cfg /boot/config/vfio-pci.cfg.bak");
+  exec("echo \"$new\" >/boot/config/vfio-pci.cfg", $output, $myreturn );
+  if ($myreturn !== "0") {
+    echo "1";
   }
 }
-</script>
+?>

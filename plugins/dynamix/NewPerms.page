@@ -56,7 +56,7 @@ $(function() {
 });
 </script>
 
-:plug5
+:newperms_1_plug:
 This is a mandatory one-time action to be taken after upgrading from a pre-5.0 Unraid server release to Unraid v5 or a later release.
 Select **ALL DISKS** when performing this one-time action.
 
@@ -69,7 +69,7 @@ as follows:
 :end
 
 <pre class="pre">
-:plug6
+:newperms_2_plug:
 For directories:
   drwxrwxrwx
 
@@ -81,7 +81,7 @@ For readonly files:
 :end
 </pre>
 
-:plug7
+:newperms_3_plug:
 Clicking **Start** will open another window and start the background process.
 
 Closing the window before completion will terminate the background process - so don't do that. This process can take a long time if you have many files.

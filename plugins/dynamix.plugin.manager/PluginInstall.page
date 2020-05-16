@@ -28,11 +28,7 @@ function installPlugin(name) {
 <input type="button" value="_(Install)_" onclick="installPlugin(this.form.file.value)">
 </form>
 
-:help1
-> To download and install a plugin, enter the plg file URL and click **Install**. A window will open
-> that displays install progress. Do not close this window until install has completed. You may also specify
-> the local file name of an extension.
-:end
+:plugin_install_help:
 
 **_(Select local plugin file)_**
 <div id="plugin_tree" class="textarea"></div>

@@ -66,11 +66,7 @@ _(Mover schedule)_:
   <?endfor;?>
   </select>
 
-:help171
-> Choose a mover schedule ranging from hourly, daily, weekly and monthly.
->
-> The interval determines how fast the mover will activated, it runs in the background.
-:end
+:mover_schedule_help:
 
 _(Day of the week)_:
 : <select name="day">
@@ -80,9 +76,7 @@ _(Day of the week)_:
   <?=mk_option($cron[4], "*", "--------", "disabled")?>
   </select>
 
-:help172
-> Choose a day when the weekly schedule is selected. Otherwise disabled.
-:end
+:mover_day_of_the_week_help:
 
 _(Day of the month)_:
 : <select name="dotm">
@@ -92,9 +86,7 @@ _(Day of the month)_:
   <?=mk_option($cron[2], "*", "--------", "disabled")?>
   </select>
 
-:help173
-> Choose a date when the monthly schedule is selected. Otherwise disabled.
-:end
+:mover_day_of_the_month_help:
 
 _(Time of the day)_:
 : <span id="H1"<?if ($move==0):?> style="display:none"<?endif;?>><select name="hour1" class="narrow">
@@ -116,11 +108,7 @@ _(Time of the day)_:
   <?=mk_option($cron[1], "*/8", _("Every 8 hours"))?>
   </select></span>
 
-:help174
-> When an hourly schedule is selected this will set the interval in hours. An interval always starts on the whole hour (minute 0).
->
-> For the other schedules choose here the time of the day the mover should start.
-:end
+:mover_time_of_the_day_help:
 
 _(Mover logging)_:
 : <select name="shareMoverLogging">
@@ -128,9 +116,7 @@ _(Mover logging)_:
   <?=mk_option($var['shareMoverLogging'], "no", _("Disabled"))?>
   </select>
 
-:help175
-> Write mover messages to the syslog file.
-:end
+:mover_logging_help:
 
 <?endif;?>
 &nbsp;

@@ -15,22 +15,27 @@ session_start();
 session_write_close();
 
 function _($text) {
+  // PHP translation function _
   global $language;
   if (!$text) return '';
   $data = $language[preg_replace(['/\&amp;|[\?\{\}\|\&\~\!\[\]\(\)\/\\:\*^\.\"\']|<.+?\/?>/','/^(null|yes|no|true|false|on|off|none)$/i','/  +/'],['','$1.',' '],$text)] ?? $text;
   return strpos($data,'*')===false ? $data : preg_replace(['/\*\*(.+?)\*\*/','/\*(.+?)\*/'],['<b>$1</b>','<i>$1</i>'],$data);
 }
 function parse_lang_file($file) {
-  return array_filter(parse_ini_string(preg_replace(['/^(null|yes|no|true|false|on|off|none)=/mi','/^([^>].*)=([^"\'`].*)$/m','/^:((help|plug)\d*)$/m','/^:end$/m'],['$1.=','$1="$2"',"_$1_=\"",'"'],str_replace(['"',"=\n"],["&#34;","=\"\"\n"],file_get_contents($file)))),'secured',ARRAY_FILTER_USE_BOTH);
+  // parser for translation files, includes some trickery to handle PHP quirks.
+  return array_safe((array)parse_ini_string(preg_replace(['/^(null|yes|no|true|false|on|off|none)=/mi','/^([^>].*)=(.*)$/m','/^:(.+_(help|plug)):$/m','/^:end$/m'],['$1.=','$1="$2"','_$1_="','"'],escapeQuotes(file_get_contents($file)))));
+}
+function parse_help_file($file) {
+  // parser for help text files, includes some trickery to handle PHP quirks.
+  return array_safe((array)parse_ini_string(preg_replace(['/^$/m','/^([^:;].+)$/m','/^:(.+_help):$/m','/^:end$/m'],['>','>$1','_$1_="','"'],escapeQuotes(file_get_contents($file)))));
 }
 function parse_text($text) {
-  return preg_replace_callback('/_\((.+?)\)_/m',function($m){return _($m[1]);},preg_replace(["/^:((help|plug)\d*)$/m","/^:end$/m"],["<?if (translate(\"_$1_\")):?>","<?endif;?>"],$text));
+  // inline text parser
+  return preg_replace_callback('/_\((.+?)\)_/m',function($m){return _($m[1]);},preg_replace(["/^:(.+_help):$/m","/^:(.+_plug):$/m","/^:end$/m"],["<?translate(\"_$1_\");?>","<?if (translate(\"_$1_\")):?>","<?endif;?>"],$text));
 }
 function parse_file($file,$markdown=true) {
+  // replacement of PHP include function
   return $markdown ? Markdown(parse_text(file_get_contents($file))) : parse_text(file_get_contents($file));
-}
-function parse_array($text,&$array) {
-  parse_str(str_replace([' ',':'],['&','='],$text),$array);
 }
 function my_lang($text,$do=0) {
   global $language;
@@ -54,29 +59,49 @@ function my_lang($text,$do=0) {
   case 3: // device translation
     [$p1,$p2] = preg_split('/(?<=[a-z])(?= ?[0-9]+)/i',$text);
     $text = _($p1).$p2;
+    break;
   }
   return $text;
 }
-function secured($v,$k) {
-  return strlen($v) && !preg_match('#<(script|iframe)(.*?)>(.+?)</(script|iframe)>|<(link|meta)\s(.+?)/?>#is',html_entity_decode($v));
+// internal helper functions
+function parse_array($text,&$array) {
+  // multi keyword parser
+  parse_str(str_replace([' ',':'],['&','='],$text),$array);
+}
+function array_safe($array) {
+  // remove potential dangerous tags
+  return array_filter($array,function($v,$k){return strlen($v) && !preg_match('#<(script|iframe)(.*?)>(.+?)</(script|iframe)>|<(link|meta)\s(.+?)/?>#is',html_entity_decode($v));},ARRAY_FILTER_USE_BOTH);
+}
+function escapeQuotes($text) {
+  // escape double quotes
+  return str_replace(["\"\n",'"'],["\" \n",'\"'],$text);
 }
 function translate($key) {
+  // replaces multi-line sections
   global $language;
   if ($plug = isset($language[$key])) eval('?>'.Markdown($language[$key]));
   return !$plug;
 }
+
+// main
 $language = [];
 $locale   = $_SESSION['locale'];
-$return   = 'function _(t){return t;}';
-$jscript  = "$docroot/webGui/javascript/translate.en.js";
+$return   = "function _(t){return t;}";
+$jscript  = "$docroot/webGui/javascript/translate.en_US.js";
+$root     = "$docroot/languages/en_US/helptext.txt";
+$help     = "$docroot/languages/en_US/helptext.dot";
 
 if ($locale) {
   $text = "$docroot/languages/$locale/translations.txt";
   if (file_exists($text)) {
-    $basis = "$docroot/languages/$locale/translations.dot";
+    $store = "$docroot/languages/$locale/translations.dot";
     // global translations
-    if (!file_exists($basis)) file_put_contents($basis,serialize(parse_lang_file($text)));
-    $language = unserialize(file_get_contents($basis));
+    if (!file_exists($store)) file_put_contents($store,serialize(parse_lang_file($text)));
+    $language = unserialize(file_get_contents($store));
+  }
+  if (file_exists("$docroot/languages/$locale/helptext.txt")) {
+    $root = "$docroot/languages/$locale/helptext.txt";
+    $help = "$docroot/languages/$locale/helptext.dot";
   }
   $jscript = "$docroot/webGui/javascript/translate.$locale.js";
   if (!file_exists($jscript)) {
@@ -93,19 +118,23 @@ if ($locale) {
       file_put_contents($jscript,$return);
     }
   }
-  // split URI into translation levels
-  $uri = array_filter(explode('/',strtok($_SERVER['REQUEST_URI'],'?')));
-  foreach($uri as $more) {
-    $more = strtolower($more);
-    $text = "$docroot/languages/$locale/$more.txt";
-    if (file_exists($text)) {
-      // additional translations
-      $other = "$docroot/languages/$locale/$more.dot";
-      if (!file_exists($other)) file_put_contents($other,serialize(parse_lang_file($text)));
-      $language = array_merge($language,unserialize(file_get_contents($other)));
-    }
-  }
-} elseif (!file_exists($jscript)) {
-  file_put_contents($jscript,$return);
 }
+// split URI into translation levels
+$uri = array_filter(explode('/',strtok($_SERVER['REQUEST_URI'],'?')));
+foreach($uri as $more) {
+  $more = strtolower($more);
+  $text = "$docroot/languages/$locale/$more.txt";
+  if (file_exists($text)) {
+    // additional translations
+    $other = "$docroot/languages/$locale/$more.dot";
+    if (!file_exists($other)) file_put_contents($other,serialize(parse_lang_file($text)));
+    $language = array_merge($language,unserialize(file_get_contents($other)));
+  }
+}
+// help text
+if (!file_exists($help)) file_put_contents($help,serialize(parse_help_file($root)));
+$language = array_merge($language,unserialize(file_get_contents($help)));
+
+// remove unused variables
+unset($return,$jscript,$root,$help,$store,$uri,$more,$text,$other);
 ?>

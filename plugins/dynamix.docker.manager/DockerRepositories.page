@@ -27,12 +27,7 @@ $template_repos = $dockerManPaths['template-repos'];
 _(Template repositories)_:
 : <textarea name="template_repos" rows="5" cols="100" style="width:550px"><?=@file_get_contents($template_repos);?></textarea>
 
-:help1
-> Use this field to add template repositories.
-> Docker templates are used to facilitate the creation and re-creation of Docker containers.  Please setup one per line.
->
-> For a list of popular community-supported repositories, visit here: <a href="http://lime-technology.com/forum/index.php?topic=37958.0" target="_blank">http://lime-technology.com/forum/index.php?topic=37958.0</a>
-:end
+:docker_repositories_help:
 
 &nbsp;
 : <input type="submit" value="_(Save)_">

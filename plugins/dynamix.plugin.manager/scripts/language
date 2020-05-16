@@ -1,0 +1,312 @@
+#!/usr/bin/php -q
+<?PHP
+// Copyright 2005-2020, Lime Technology
+// License: GPLv2 only
+//
+// Program updates made by Bergware International (April 2020)
+$usage = <<<EOF
+Process language files.
+
+Usage: language install LANGUAGE-FILE
+  install a language
+
+Usage: language [attribute name] LANGUAGE-FILE
+  obtain an attribute value
+
+Usage: language check LANGUAGE
+  check and output the latest version of the language
+
+Usage: language update LANGUAGE
+  update the language
+
+Usage: language remove LANGUAGE
+  remove the language
+
+Usage: language checkall
+  check the latest version of all installed languages
+
+Usage: language updateall
+  update all installed languages
+
+EOF;
+
+function error_desc($code) {
+  switch($code) {
+    case 0: return 'No errors';
+    case -1: return 'Generic error';
+    case 1: return 'Generic error';
+    case 2: return 'Parse error';
+    case 3: return 'File I/O error';
+    case 4: return 'Network failure';
+    case 5: return 'SSL verification failure';
+    case 6: return 'Username/password authentication failure';
+    case 7: return 'Protocol errors';
+    case 8: return 'Invalid URL / Server error response';
+    default: return 'Error code '.$code;
+  }
+}
+
+function download($url, $name, &$error) {
+  if ($file = popen("wget --compression=auto --no-cache --progress=dot -O $name $url 2>&1", 'r')) {
+    echo "language: downloading: $url ...\r";
+    $level = -1;
+    while (!feof($file)) {
+      if (preg_match('/\d+%/', fgets($file), $matches)) {
+        $percentage = substr($matches[0],0,-1);
+        if ($percentage > $level) {
+          echo "language: downloading: $url ... $percentage%\r";
+          $level = $percentage;
+        }
+      }
+    }
+    if (($perror = pclose($file)) == 0) {
+      echo "language: downloading: $url ... done\n";
+      return true;
+    } else {
+      echo "language: downloading: $url ... failed (".error_desc($perror).")\n";
+      $error = "$url download failure (".error_desc($perror).")";
+      return false;
+    }
+  } else {
+    $error = "$url failed to open";
+    return false;
+  }
+}
+
+function language($method, $xml_file, &$error) {
+  global $docroot, $boot, $plugins, $tmp;
+
+  // parse language XML file
+  $xml = file_exists($xml_file) ? simplexml_load_file($xml_file,NULL,LIBXML_NOCDATA) : false;
+  if ($xml === false) {
+    $error = "XML file doesn't exist or xml parse error";
+    return false;
+  }
+  switch ($method) {
+  case 'install':
+    $url = $xml->LanguageURL;
+    $name = $xml->LanguagePack;
+    $save = "$boot/dynamix/lang-$name.zip";
+    if (!file_exists($save)) {
+      if ($url) {
+        if (!download($url, $save, $error)) {
+          @unlink($save);
+          return false;
+        }
+      } else {
+        $error = "missing URL";
+        return false;
+      }
+    }
+    $path = "$docroot/languages/$name";
+    exec("mkdir -p $path");
+    @unlink("$docroot/webGui/javascript/translate.$name.js");
+    foreach (glob("$path/*.dot",GLOB_NOSORT) as $dot_file) unlink($dot_file);
+    exec("unzip -qqLjo -d $path $save", $dummy, $err);
+    if ($err > 1) {
+      @unlink($save);
+      exec("rm -rf $path");
+      $error = "unzip failed. Error code $err";
+      return false;
+    }
+    return true;
+  case 'remove':
+    $name = $xml->LanguagePack;
+    if ($name) {
+      $path = "$docroot/languages/$name";
+      exec("rm -rf $path");
+      @unlink("$docroot/webGui/javascript/translate.$name.js");
+      @unlink("$boot/lang-$name.xml");
+      @unlink("$plugins/lang-$name.xml");
+      @unlink("$tmp/lang-$name.xml");
+      @unlink("$boot/dynamix/lang-$name.zip");
+      return true;
+    } else {
+      $error = "missing language pack";
+      return false;
+    }
+  case 'dump':
+    // dump file: debugging
+    echo print_r($xml);
+    return true;
+  default:
+    // return single attribute
+    $error = "$method attribute not present";
+    return $xml->$method ?: false;
+  }
+}
+
+// MAIN - single argument
+if ($argc < 2) {
+  echo $usage;
+  exit(1);
+}
+
+$docroot = '/usr/local/emhttp';
+$boot    = '/boot/config/plugins';
+$plugins = '/var/log/plugins';
+$tmp     = '/tmp/plugins';
+$method  = $argv[1];
+
+if ($method == 'checkall') {
+  echo "language: checking all language packs\n";
+  foreach (glob("$plugins/lang-*.xml", GLOB_NOSORT) as $link) {
+    $lang_file = @readlink($link);
+    if ($lang_file === false) continue;
+    if (language('LanguageURL', $lang_file, $error) === false) continue;
+    $name = str_replace('lang-', '', basename($lang_file, '.xml'));
+    $lang = language('Language', $lang_file, $error) ?: $name;
+    echo "language: checking $lang language pack ...\n";
+    exec(realpath($argv[0])." check $name >/dev/null");
+  }
+  exit(0);
+}
+
+if ($method == 'updateall') {
+  echo "language: updating all language packs\n";
+  foreach (glob("$plugins/lang-*.xml", GLOB_NOSORT) as $link) {
+    $lang_file = @readlink($link);
+    if ($lang_file === false) continue;
+    if (language('LanguageURL', $lang_file, $error) === false) continue;
+    $version = language('Version', $lang_file, $error);
+    $name = str_replace('lang-', '', basename($lang_file, '.xml'));
+    $lang = language('Language', $lang_file, $error) ?: $name;
+    $latest = language('Version', "$tmp/lang-$name.xml", $error);
+    // update only when newer
+    if (strcmp($latest, $version) > 0) {
+      echo "language: updating $lang language pack ...\n";
+      exec(realpath($argv[0])." update $name >/dev/null");
+    }
+  }
+  exit(0);
+}
+
+// MAIN - two arguments
+if ($argc != 3) {
+  echo $usage;
+  exit(1);
+}
+
+if ($method == 'install') {
+  echo "language: installing language pack\n";
+  if (substr($argv[2],0,7)=='http://' || substr($argv[2],0,8)=='https://') {
+    $langURL = $argv[2];
+    echo "language: downloading $langURL\n";
+    $name = basename($langURL);
+    $xml_file = "$tmp/$name";
+    if (!download($langURL, $xml_file, $error)) {
+      echo "language: $error\n";
+      @unlink($xml_file);
+      exit(1);
+    }
+  } else {
+    $xml_file = realpath($argv[2]);
+    $name = basename($xml_file);
+  }
+  $link_file = "$plugins/$name";
+  $lang_file = "$boot/$name";
+  @unlink($link_file);
+  if (language('install', $xml_file, $error) === false) {
+    echo "language: $error\n";
+    exit(1);
+  }
+  $lang = language('Language', $xml_file, $error) ?: substr($name,0,-4);
+  copy($xml_file, $lang_file);
+  symlink($lang_file, $link_file);
+  echo "language: $lang language pack installed\n";
+  exit(0);
+}
+
+if ($method == 'check') {
+  $name = $argv[2];
+  echo "language: checking language pack\n";
+  $link_file = "$plugins/lang-$name.xml";
+  $lang_file = @readlink($link_file);
+  if ($lang_file === false) {
+    echo "language: $name language pack not installed\n";
+    exit(1);
+  }
+  $templateURL = language('TemplateURL', $lang_file, $error);
+  if ($templateURL === false) {
+    echo "language: $error\n";
+    exit(1);
+  }
+  $xml_file = "$tmp/lang-$name.xml";
+  if (!download($templateURL, $xml_file, $error)) {
+    echo "language: $error\n";
+    @unlink($xml_file);
+    exit(1);
+  }
+  $version = language('Version', $xml_file, $error);
+  if ($version === false) {
+    echo "language: $error\n";
+    exit(1);
+  }
+  echo "$version\n";
+  exit(0);
+}
+
+if ($method == 'update') {
+  $name = $argv[2];
+  echo "language: updating language pack\n";
+  $link_file = "$plugins/lang-$name.xml";
+  $lang_file = @readlink($link_file);
+  if ($lang_file === false) {
+    echo "language: $name language pack not installed\n";
+    exit(1);
+  }
+  // verify previous check has been done
+  $xml_file = "$tmp/lang-$name.xml";
+  if (!file_exists($xml_file)) {
+    echo "language: update does not exist, perform a check first\n";
+    exit (1);
+  }
+  $lang = language('Language', $xml_file, $error) ?: $name;
+  // check for a reinstall of same version
+  $old_version = language('Version', $lang_file, $error);
+  $new_version = language('Version', $xml_file, $error);
+  if ($new_version == $old_version) {
+    echo "language: $lang language pack not reinstalling same version\n";
+    exit(1);
+  }
+  // install the updated plugin
+  @unlink("$boot/dynamix/lang-$name.zip");
+  @unlink($link_file);
+  if (language('install', $xml_file, $error) === false) {
+    echo "language: $error\n";
+    exit(1);
+  }
+  copy($xml_file, $lang_file);
+  symlink($lang_file, $link_file);
+  echo "language: $lang language pack updated\n";
+  exit(0);
+}
+
+if ($method == 'remove') {
+  $name = $argv[2];
+  echo "language: removing language pack\n";
+  $link_file = "$plugins/lang-$name.xml";
+  $lang_file = @readlink($link_file);
+  if ($lang_file === false) {
+    echo "language: $name language pack not installed\n";
+    exit(1);
+  }
+  $lang = language('Language', $lang_file, $error) ?: $name;
+  if (language('remove', $lang_file, $error) === false) {
+    echo "language: $error\n";
+    exit(1);
+  }
+  echo "language: $lang language pack removed\n";
+  exit(0);
+}
+
+// return attribute
+$xml_file =  $argv[2];
+$value = language($method, $xml_file, $error);
+if ($value === false) {
+  echo "language: $error\n";
+  exit(1);
+}
+echo "$value\n";
+exit(0);
+?>

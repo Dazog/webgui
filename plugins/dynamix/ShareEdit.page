@@ -52,21 +52,10 @@ function globalInclude($name) {
 // global shares include/exclude
 $myDisks = array_filter(array_diff(array_keys(array_filter($disks,'my_disks')), explode(',',$var['shareUserExclude'])), 'globalInclude');
 ?>
-:help3
-> A *Share*, also called a *User Share*, is simply the name of a top-level directory that exists on one or more of your
-> storage devices (array and cache).  Each share can be exported for network access.  When browsing a share, we return the
-> composite view of all files and subdirectories for which that top-level directory exists on each storage device.
->
-> *Read settings from* is used to preset the settings of the new share with the settings of an existing share.
->
-> Select the desired share name and press **Read** to copy the settings from the selected source.
+:share_edit_global1_help:
 <?if ($name):?>
->
-> *Write settings to* is used to copy the settings of the current share to one or more other existing shares.
->
-> Select the desired destinations and press **Write** to copy the settings to the selected shares.
+:share_edit_global2_help:
 <?endif;?>
-:end
 
 <div id="" class="clone1">
 <span class="clone">_(Read settings from)_</span><i class="fa fa-arrow-left fa-fw"></i>
@@ -97,21 +86,12 @@ foreach ($rows as $row) echo $row;
 _(Share name)_:
 : <input type="text" name="shareName" maxlength="40" value="<?=htmlspecialchars($name)?>">
 
-:help4
-> The share name can be up to 40 characters, and is case-sensitive with these restrictions:
->
-> * cannot contain a double-quote character (") or the following characters: / \ * < > |
-> * cannot be one of the reserved share names: flash, cache, cach2, .., disk1, disk2, ..
->
-> We highly recommend to make your life easier and avoid special characters.
-:end
+:share_edit_name_help:
 
 _(Comments)_:
 : <input type="text" name="shareComment" maxlength="256" value="<?=htmlspecialchars($share['comment'])?>">
 
-:help5
-> Anything you like, up to 256 characters.
-:end
+:share_edit_comments_help:
 
 _(Use cache pool (for new files/directories))_:
 : <span class="input"><select name="shareUseCache" onchange="updateScreen(this.value)"<?=$pool_devices?'':' disabled'?>>
@@ -121,31 +101,7 @@ _(Use cache pool (for new files/directories))_:
   <?=mk_option($share['useCache'], "only", _('Only'))?>
   </select></span><span id="moverAction"></span>
 
-:help11
-> Specify whether new files and directories written on the share can be written onto the Cache disk/pool if present.  
-> This setting also affects *mover* behavior.
->
-> **No** prohibits new files and subdirectories from being written onto the Cache disk/pool.  
-> *Mover* will take no action so any existing files for this share that are on the cache are left there.
->
-> **Yes** indicates that all new files and subdirectories should be written to the Cache disk/pool, provided
-> enough free space exists on the Cache disk/pool.  
-> If there is insufficient space on the Cache disk/pool, then new files and directories are created on the array.  
-> When the *mover* is invoked, files and subdirectories are transferred off the Cache disk/pool and onto the array.
->
-> **Only** indicates that all new files and subdirectories must be writen to the Cache disk/pool.  
-> If there is insufficient free space on the Cache disk/pool, *create* operations will fail with *out of space* status.  
-> *Mover* will take no action so any existing files for this share that are on the array are left there.
->
-> **Prefer** indicates that all new files and subdirectories should be written to the Cache disk/pool, provided
-> enough free space exists on the Cache disk/pool.  
-> If there is insufficient space on the Cache disk/pool, then new files and directories are created on the array.  
-> When the *mover* is invoked, files and subdirectories are transferred off the array and onto the Cache disk/pool.
->
-> **NOTE:** Mover will never move any files that are currently in use.  
-> This means if you want to move files associated with system services such as Docker or VMs then you need to
-> disable these services while mover is running.  
-:end
+:share_edit_cache_pool_help:
 
 _(Select cache pool)_:
 : <select name="shareCachePool">
@@ -160,15 +116,7 @@ _(Enable Copy-on-write)_:
   <?=mk_option($share['cow'], "auto", _('Auto'))?>
   </select></span><?if ($name):?>_(Set when adding new share only)_<?endif;?>
 
-:help12
-> Set to **No** to cause the *btrfs* NOCOW (No Copy-on-Write) attribute to be set on the share directory
-> when created on a device formatted with *btrfs* file system.  Once set, newly created files and
-> subdirectories on the device will inherit the NOCOW attribute.  We recommend this setting for shares
-> used to store vdisk images, including the Docker loopback image file.  This setting has no effect
-> on non-btrfs file systems.
->
-> Set to **Auto** for normal operation, meaning COW **will** be in effect on devices formatted with *btrfs*.
-:end
+:share_edit_copy_on_write_help:
 
 _(Allocation method)_:
 : <select name="shareAllocator">
@@ -177,35 +125,12 @@ _(Allocation method)_:
   <?=mk_option($share['allocator'], "mostfree", _('Most-free'))?>
   </select>
 
-:help6
-> This setting determines how Unraid OS will choose which disk to use when creating a new file or directory:
->
-> **High-water**
-> Choose the lowest numbered disk with free space still above the current *high water mark*.  The
-> *high water mark* is initialized with the size of the largest data disk divided by 2.  If no disk
-> has free space above the current *high water mark*, divide the *high water mark* by 2 and choose again.
->
-> The goal of **High-water** is to write as much data as possible to each disk (in order to minimize
-> how often disks need to be spun up), while at the same time, try to keep the same amount of free space on
-> each disk (in order to distribute data evenly across the array).
->
-> **Fill-up**
-> Choose the lowest numbered disk that still has free space above the current **Minimum free space**
-> setting.
->
-> **Most-free**
-> Choose the disk that currently has the most free space.
-:end
+:share_edit_allocation_method_help:
 
 _(Minimum free space)_:
 : <input type="text" name="shareFloor" maxlength="16" class="narrow" value="<?=htmlspecialchars($share['floor'])?>">
 
-:help7
-> The *minimum free space* available to allow writing to any disk belonging to the share.<br>
->
-> Choose a value which is equal or greater than the biggest single file size you intend to copy to the share.
-> Include units KB, MB, GB and TB as appropriate, e.g. 10MB.
-:end
+:share_edit_free_space_help:
 
 _(Split level)_:
 : <select name="shareSplitLevel">
@@ -218,31 +143,7 @@ _(Split level)_:
   <?=mk_option($share['splitLevel'], "0", _('Manual: do not automatically split directories'))?>
   </select>
 
-:help8
-> Determines whether a directory is allowed to expand onto multiple disks.
-
-> **Automatically split any directory as required**
-> When a new file or subdirectory needs to be created in a share, Unraid OS first chooses which disk
-> it should be created on, according to the configured *Allocation method*.  If the parent directory containing
-> the new file or or subdirectory does not exist on this disk, then Unraid OS will first create all necessary
-> parent directories, and then create the new file or subdirectory.
->
-> **Automatically split only the top level directory as required**
-> When a new file or subdirectory is being created in the first level subdirectory of a share, if that first
-> level subdirectory does not exist on the disk being written, then the subdirectory will be created first.
-> If a new file or subdirectory is being created in the second or lower level subdirectory of a share, the new
-> file or subdirectory is created on the same disk as the new file or subdirectory's parent directory.
->
-> **Automatically split only the top "N" level directories as required**
-> Similar to previous: when a new file or subdirectory is being created, if the parent directory is at level "N",
-> and does not exist on the chosen disk, Unraid OS will first create all necessary parent directories.  If the
-> parent directory of the new file or subdirectory is beyond level "N", then the new file or subdirectory is
-> created on the same disk where the parent directory exists.
->
-> **Manual: do not automatically split directories**
-> When a new file or subdirectory needs to be created in a share, Unraid OS will only consider disks where the
-> parent directory already exists.
-:end
+:share_edit_split_level_help:
 
 _(Included disk(s))_:
 : <select id="s1" name="shareInclude" multiple="multiple" style="display:none">
@@ -251,10 +152,7 @@ _(Included disk(s))_:
   <?endforeach;?>
   </select>
 
-:help9
-> Specify the disks which can be used by the share. By default all disks are included; that is, if specific
-> disks are not selected here, then the share may expand into *all* array disks.
-:end
+:share_edit_included_disks_help:
 
 _(Excluded disk(s))_:
 : <select id="s2" name="shareExclude" multiple="multiple" style="display:none">
@@ -263,9 +161,7 @@ _(Excluded disk(s))_:
   <?endforeach;?>
   </select>
 
-:help10
-> Specify the disks which can *not* be used by the share. By default no disks are excluded.
-:end
+:share_edit_excluded_disks_help:
 
 <?if (!$name):?>
 &nbsp;
@@ -274,9 +170,7 @@ _(Excluded disk(s))_:
 _(Share status)_:
 : _(Share is empty)_
 
-:help13
-> Share does *not* contain any data and may be deleted if not needed any longer.
-:end
+:share_edit_status_help:
 
 _(Delete)_<input type="checkbox" name="confirmDelete" onchange="chkDelete(this.form, this.form.cmdEditShare);">
 : <input type="submit" name="cmdEditShare" value="_(Apply)_" onclick="if (this.value=='_(Delete)_')this.value='Delete';else this.value='Apply'" disabled><input type="button" value="_(Done)_" onclick="done()">
@@ -284,9 +178,7 @@ _(Delete)_<input type="checkbox" name="confirmDelete" onchange="chkDelete(this.f
 _(Share status)_:
 : _(Share contains data)_
 
-:help14
-> Share can *not* be deleted as long as it contains data. Be aware that some data can be hidden. See also [SMB Settings](/Settings/SMB) -> Hide "dot" files.
-:end
+:share_edit_delete_help:
 
 &nbsp;
 : <input type="submit" name="cmdEditShare" value="_(Apply)_" onclick="this.value='Apply'" disabled><input type="button" value="_(Done)_" onclick="done()">
@@ -376,12 +268,12 @@ function prepareEdit(form) {
     swal({title:'_(Missing share name)_',text:'_(Enter a name for the share)_',type:'error',confirmButtonText:'_(Ok)_'});
     return false;
   }
-  var reserved = [<?=implode(',',array_map('escapeshellarg',explode(',',$var['reservedNames'])))?>];
+  var reserved = [<?=implode(',',array_map('escapestring',explode(',',$var['reservedNames'])))?>];
   if (reserved.includes(share)) {
     swal({title:'_(Invalid share name)_',text:'_(Do not use reserved names)_',type:'error',confirmButtonText:'_(Ok)_'});
     return false;
   }
-  var pools = [<?=implode(',',array_map('escapeshellarg',$pools))?>];
+  var pools = [<?=implode(',',array_map('escapestring',$pools))?>];
   if (pools.includes(share)) {
     swal({title:'_(Invalid share name)_',text:'_(Do not use pool names)_',type:'error',confirmButtonText:'_(Ok)_'});
     return false;

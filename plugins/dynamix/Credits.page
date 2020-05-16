@@ -3,17 +3,19 @@ Title="Credits"
 Icon="icon-credits"
 Tag="trophy"
 ---
-**Unraid webGUI** Copyright &copy; 2005-2019, [Lime Technology, Inc.](http://lime-technology.com).
+**Unraid webGUI** Copyright &copy; 2005-2020, [Lime Technology, Inc.](http://lime-technology.com)
 
-**Dynamix** Copyright &copy; 2012-2019, Bergware International.
+**Dynamix** Copyright &copy; 2012-2020, Bergware International.
 
-**Extended Docker Configuration Page** Copyright &copy; 2014-2017, Guilherme Jardim.
+**Extended Docker Configuration Page** Copyright &copy; 2014-2020, Guilherme Jardim.
 
-**VM Manager** Copyright &copy; 2015-2019, Eric Schultz, Derek Macias.
+**VM Manager** Copyright &copy; 2015-2020, Eric Schultz, Derek Macias.
 
 **APC UPS Configuration Page** Copyright &copy; 2015, Dan Landon.
 
 **Simple Features** Copyright &copy; 2012, Andrew Hamer-Adams.
+
+**SysDev UI** Copyright &copy; 2020, Justin Nolan
 
 The Software comprising the Unraid webGui, which is all files within this repository **except** for
 files listed below, is licensed under GPL version 2.
@@ -21,18 +23,26 @@ files listed below, is licensed under GPL version 2.
 * The Lime Technology and Unraid logos are property of Lime Technology, Inc.
 and may not be used in any other project without written permission from Lime Technology, Inc.
 
-* Settings, Tools and Case icons. Copyright &copy; 2018-2019, [Magnus Engø](http://www.magnusengo.net/). Used with permission.
+* Settings, Tools and Case icons. Copyright &copy; 2018-2020, [Magnus Engø.](http://www.magnusengo.net/) Used with permission.
 
-**Unraid**&reg; is a registered trademark of [Lime Technology, Inc.](http://lime-technology.com).
+**Unraid**&reg; is a registered trademark of [Lime Technology, Inc.](http://lime-technology.com)
 
 This file shall be included in all copies or substantial portions of the Software.
 
 <?
-$translations = [];
-foreach (glob("$docroot/languages/*",GLOB_ONLYDIR) as $lang) {
-  if (file_exists("$lang/credits")) $credits = parse_ini_file("$lang/credits",false,INI_SCANNER_RAW);
-  if (isset($credits['name']) && isset($credits['language']) && $credits['name']!='NAME' && $credits['language']!='LANGUAGE') $translations[] = "Language translations to <i>{$credits['language']}</i>, provided by <b>{$credits['name']}</b>.<br><br>";
+require_once "$docroot/plugins/dynamix.plugin.manager/include/PluginHelpers.php";
+
+$plugins = '/var/log/plugins';
+$credits = [];
+
+foreach (glob("$plugins/lang-*.xml", GLOB_NOSORT) as $link) {
+  $xml_file = @readlink($link);
+  if ($xml_file === false) continue;
+  $lang = language('Language', $xml_file);
+  $local = language('LanguageLocal', $xml_file);
+  $author = language('Author', $xml_file);
+  $credits[] = "<li><p><i>$lang ($local)</i> translation by $author</p></li>";
 }
-if (count($translations)) echo '<br><b>Language Translations</b><br>--------------------------<br>'.implode('',$translations);
+if (count($credits)) echo '<br><b>Language Translations</b> Copyright &copy; 2020, <a href="http://lime-technology.com">Lime Technology, Inc.</a><br><ul>'.implode('',$credits).'</ul>';
 ?>
 <br><input type="button" value="_(Done)_" onclick="done()">

@@ -1,5 +1,5 @@
 Cond="file_exists('/etc/nginx/htpasswd')"
-Menu="Buttons:1"
+Menu="Buttons:2"
 Title="Logout"
 Icon="icon-u-logout"
 Code="e937"

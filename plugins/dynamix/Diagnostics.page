@@ -52,7 +52,7 @@ function diagnostics(file) {
 }
 </script>
 <div id="pleaseWait" style="display:none;font-weight:bold;color:red;text-align:center;margin:0">_(Please wait)_... _(collecting diagnostic information (this may take several minutes))_</div>
-:plug1
+:diagnostics_1_plug:
 This utility is used for troubleshooting purposes. It will collect all of the system information and configuration files, and package these files in a single ZIP file which can be saved locally.
 Subsequently, this file can be included in your correspondence with Limetech or the Unraid forum.
 
@@ -61,7 +61,7 @@ and configuration files are collected:
 :end
 
 <pre class="pre" markdown="1">
-:plug2
+:diagnostics_2_plug:
 + */config*
   <br>copy all *\*.cfg files*, *go* file and the *super.dat* file. These are configuration files.
 + */config/shares*
@@ -81,7 +81,7 @@ and configuration files are collected:
 :end
 </pre>
 
-:plug3
+:diagnostics_3_plug:
 Clicking **Download** will start the collection process and then instruct your browser to save the zip file locally.
 
 *No personal information such as user names, passwords, or any other file contents not specified above is included
