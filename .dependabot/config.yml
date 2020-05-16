@@ -1,5 +1,6 @@
 version: 1
 update_configs:
-  - package_manager: "php:composer"
+   - package_manager: "javascript"
     directory: "/plugins"
     update_schedule: "daily"
+
